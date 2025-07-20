@@ -9,4 +9,4 @@ const UserSchema = mongoose.Schema({
   dm_list: [{ Type: mongoose.Types.ObjectId }],
 });
 
-modules.export = mongoose.model("User", UserSchema);
+module.exports = mongoose.model("User", UserSchema);
