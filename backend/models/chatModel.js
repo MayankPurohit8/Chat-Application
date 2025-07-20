@@ -7,4 +7,4 @@ const chatSchema = mongoose.Schema({
   created_to: { type: mongoose.Types.ObjectId, ref: "User" },
 });
 
-modules.export = mongoose.model("Chat", chatSchema);
+module.exports = mongoose.model("Chat", chatSchema);

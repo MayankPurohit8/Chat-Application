@@ -1,10 +1,10 @@
-import Chat from "../models/chatModel";
-import User from "../models/userModel";
+const Chat = require("../models/chatModel");
+const User = require("../models/userModel");
 const sendMessage = async (req, res) => {
   try {
     const created_by = req.id;
-    const created_to = req.to;
-    const chat = req.message;
+    const created_to = req.body;
+    const chat = req.body;
     const user = User.findbyId(created_by);
     const newChat = await Chat.create({
       created_by,
@@ -13,9 +13,9 @@ const sendMessage = async (req, res) => {
     });
 
     if (!user.dm_list.includes(created_to)) {
-      user.dm_list.push(created_to);
+      await user.dm_list.push(created_to);
     }
-    return res.status(200);
+    return res.status(200).json({ messgae: "sent" });
   } catch (err) {}
 };
 
@@ -35,10 +35,36 @@ const getProfile = async (req, res) => {
   } catch (err) {}
 };
 
+const searchUser = async (req, res) => {
+  try {
+    const { user, name } = req.query;
+
+    const users = await User.find({ name: { $regex: `^${name}` } }).select(
+      "-password -__v"
+    );
+    const curruser = await User.findById(user);
+    const resUser = users.filter(
+      (user) => !curruser.dm_list.includes(user._id) && user != curruser._id
+    );
+
+    return res.status(200).json({ users: resUser });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "somethin went wrong while searching" });
+  }
+};
 const updateProfile = async (req, res) => {};
 
 const blockUser = async (req, res) => {};
 
 const unblockUser = async (req, res) => {};
 
-modules.export = { sendMessage, getlist, getProfile, updateProfile, blockUser };
+module.exports = {
+  sendMessage,
+  getlist,
+  getProfile,
+  updateProfile,
+  blockUser,
+  searchUser,
+};

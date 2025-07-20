@@ -7,6 +7,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./utils/connectDB");
 const { Server } = require("socket.io");
 const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -34,4 +35,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/user", userRoutes);
+
 server.listen(5000);
