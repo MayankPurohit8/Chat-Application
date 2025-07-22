@@ -28,7 +28,7 @@ function Welcome() {
       setLogin(true);
       toast("Login to get started");
     } catch (err) {
-      toast(err.response.data.message);
+      toast(err.response);
     }
   };
 

@@ -5,8 +5,8 @@ const UserSchema = mongoose.Schema({
   email: { type: String },
   password: { type: String },
   profile_pic: { type: String },
-  Bio: { Type: String },
-  dm_list: [{ Type: mongoose.Types.ObjectId }],
+  Bio: { type: String },
+  dm_list: [{ type: mongoose.Types.ObjectId, ref: "User" }],
 });
 
 module.exports = mongoose.model("User", UserSchema);

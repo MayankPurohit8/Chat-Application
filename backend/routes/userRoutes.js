@@ -7,8 +7,11 @@ const {
   updateProfile,
   blockUser,
   searchUser,
+  getChats,
 } = require("../controllers/userControllers");
 
 router.get("/search", searchUser);
-
+router.get("/getChats", getChats);
+router.post("/send", sendMessage);
+router.get("/list", getlist);
 module.exports = router;

@@ -2,27 +2,36 @@ const Chat = require("../models/chatModel");
 const User = require("../models/userModel");
 const sendMessage = async (req, res) => {
   try {
-    const created_by = req.id;
-    const created_to = req.body;
-    const chat = req.body;
-    const user = User.findbyId(created_by);
+    const created_by = req.body.user;
+    const created_to = req.body.to;
+    const chat = req.body.message;
+    const user = await User.findById(created_by);
+    const to = await User.findById(created_to);
     const newChat = await Chat.create({
       created_by,
       created_to,
       chat,
     });
-
     if (!user.dm_list.includes(created_to)) {
-      await user.dm_list.push(created_to);
+      user.dm_list.push(created_to);
+      await user.save();
     }
-    return res.status(200).json({ messgae: "sent" });
+    if (!to.dm_list.includes(created_by)) {
+      to.dm_list.push(created_by);
+      await to.save();
+    }
+    return res.status(200).json({ message: "sent" });
   } catch (err) {}
 };
 
 const getlist = async (req, res) => {
   try {
-    const receivers = await User.findbyId(req.id).dm_list;
-    return res.send(200).json({ list: receivers });
+    const { user } = req.query;
+
+    const currUser = await User.findById(user).populate("dm_list", "name");
+    list = currUser.dm_list;
+
+    return res.status(200).json({ list: list });
   } catch (err) {}
 };
 
@@ -54,6 +63,20 @@ const searchUser = async (req, res) => {
       .json({ message: "somethin went wrong while searching" });
   }
 };
+
+const getChats = async (req, res) => {
+  try {
+    const { user, to } = req.query;
+    const chats = await Chat.find({
+      $or: [
+        { created_by: user, created_to: to },
+        { created_by: to, created_to: user },
+      ],
+    }).sort({ created_at: 1 });
+
+    return res.status(200).json({ chats: chats });
+  } catch (err) {}
+};
 const updateProfile = async (req, res) => {};
 
 const blockUser = async (req, res) => {};
@@ -67,4 +90,5 @@ module.exports = {
   updateProfile,
   blockUser,
   searchUser,
+  getChats,
 };

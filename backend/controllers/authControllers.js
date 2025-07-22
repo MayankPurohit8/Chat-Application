@@ -50,6 +50,22 @@ const login = async (req, res) => {
       .json({ maeesage: "something went wrong while logging the user" });
   }
 };
+
+const verify = (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(400).json({ message: "Invalid Access" });
+    }
+
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    if (!decoded) {
+      return res.status(400).json({ message: "Invalid Access" });
+    }
+    req.id = decoded.id;
+    res.status(200).json({ message: "verified", id: decoded.id });
+  } catch (err) {}
+};
 const logout = async (req, res) => {};
 
-module.exports = { register, login, logout };
+module.exports = { register, login, logout, verify };
