@@ -6,6 +6,7 @@ import Welcome from "./pages/Welcome";
 import { ToastContainer } from "react-toastify";
 import { BrowserRouter, Routes, Route } from "react-router";
 import Chat from "./pages/Chat";
+
 function App() {
   const [count, setCount] = useState(0);
 

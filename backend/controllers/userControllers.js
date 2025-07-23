@@ -1,5 +1,6 @@
 const Chat = require("../models/chatModel");
 const User = require("../models/userModel");
+const io = require("../server");
 const sendMessage = async (req, res) => {
   try {
     const created_by = req.body.user;
@@ -20,7 +21,7 @@ const sendMessage = async (req, res) => {
       to.dm_list.push(created_by);
       await to.save();
     }
-    return res.status(200).json({ message: "sent" });
+    return res.status(200).json({ message: "sent", chat: newChat });
   } catch (err) {}
 };
 

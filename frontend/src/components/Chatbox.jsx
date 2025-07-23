@@ -2,10 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { Send } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { socket } from "../../connectSocket";
 function Chatbox({ to, user }) {
   const bottomref = useRef(null);
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState("");
+  socket.on("res", (data) => {
+    setChats([...chats, data]);
+  });
   useEffect(() => {
     const getChats = async () => {
       try {
@@ -17,7 +21,7 @@ function Chatbox({ to, user }) {
       } catch (err) {}
     };
     getChats();
-  }, [message]);
+  }, []);
   useEffect(() => {
     bottomref.current?.scrollIntoView({
       behavior: "smooth",
@@ -36,6 +40,8 @@ function Chatbox({ to, user }) {
         { user, to, message },
         { withCredentials: true }
       );
+      socket.emit("new", res.data.chat);
+
       setMessage("");
     } catch (err) {}
   };

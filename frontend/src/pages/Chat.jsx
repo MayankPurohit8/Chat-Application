@@ -3,7 +3,7 @@ import Chatbox from "../components/Chatbox";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-
+import { socket } from "../../connectSocket";
 function Chat() {
   const [dm_list, set_dm_list] = useState([]);
   const [verified, setVerifired] = useState(false);
@@ -15,6 +15,9 @@ function Chat() {
   const [chatting, setChatting] = useState();
 
   useEffect(() => {
+    if (!socket.connected) {
+      socket.connect();
+    }
     const verifyUser = async () => {
       try {
         setLoading(true);

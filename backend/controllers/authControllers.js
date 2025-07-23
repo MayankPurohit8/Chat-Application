@@ -39,6 +39,7 @@ const login = async (req, res) => {
         process.env.SECRET_KEY
       );
       res.cookie("token", token, { maxage: 100000, httponly: true });
+
       res.status(200).json({ message: "login successfull" });
     } else {
       res.status(404).json({ message: "email not registered" });

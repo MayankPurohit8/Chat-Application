@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
+import { socket } from "../../connectSocket";
 function Welcome() {
   const navigate = useNavigate();
   const [login, setLogin] = useState(false);
@@ -44,10 +45,12 @@ function Welcome() {
         { email, password },
         { withCredentials: true }
       );
+      console.log(res);
       toast.success(res.data.message);
+      socket.connect();
       navigate("/app");
     } catch (err) {
-      toast.error(err.response.data.message);
+      toast.error(err.response);
     }
   };
   return (
