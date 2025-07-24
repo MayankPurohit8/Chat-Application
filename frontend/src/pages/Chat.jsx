@@ -12,7 +12,7 @@ function Chat() {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [searchResultvisible, setSearchResultVisible] = useState(false);
-  const [chatting, setChatting] = useState();
+  const [chatting, setChatting] = useState(null);
 
   useEffect(() => {
     if (!socket.connected) {
@@ -47,6 +47,15 @@ function Chat() {
     if (user) getList();
   }, [user]);
 
+  useEffect(() => {
+    if (!user || !dm_list.length) {
+      return;
+    }
+    dm_list.forEach((reciepent) => {
+      const roomid = [user, reciepent._id].sort().join("_");
+      socket.emit("connect-to-room", roomid);
+    });
+  }, [dm_list]);
   const searchUser = async () => {
     try {
       if (!search) {
@@ -161,22 +170,22 @@ function Chat() {
           <div className="md:w-1/4 w-full h-full  overflow-auto flex flex-col  py-2 gap-2 relative">
             <div className="px-5 py-3 text-5xl text-slate-600">Chats</div>
 
-            {dm_list.map((user) => (
+            {dm_list.map((reciepent) => (
               <div
                 className={`transition-all ease-in-out delay-100 grid grid-cols-3 grid-rows-2 px-3 py-5  shadow-xl  hover:bg-purple-50 ${
-                  chatting == user._id
+                  chatting == reciepent._id
                     ? "scale-105 bg-purple-200 hover:bg-purple-200"
                     : "bg-white"
                 }`}
                 onClick={() => {
-                  setChatting(user._id);
+                  setChatting(reciepent._id);
                 }}
               >
                 <div className={`row-span-2 flex items-center justify-center `}>
                   <div className="border px-5 py-3 rounded-full">U</div>
                 </div>
                 <div className="overflow-hidden font-bold text-2xl h-8">
-                  {user.name}
+                  {reciepent.name}
                 </div>
                 <div className="overflow-hidden text-gray-600 ml-2">
                   yesterday

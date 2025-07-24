@@ -14,9 +14,14 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   console.log("A user connected", socket.id);
-  socket.on("new", (data) => {
-    console.log(data);
-    io.emit("res", data);
+
+  socket.on("connect-to-room", (data) => {
+    console.log(`socket-${socket.id} connected to room-${data}`);
+    socket.join(data);
+  });
+  socket.on("send-message", (message, roomid) => {
+    console.log(`message-${message} sent in room-${roomid}`);
+    io.to(roomid).emit("recieve-message", message);
   });
 });
 
