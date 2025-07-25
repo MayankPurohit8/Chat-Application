@@ -4,6 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { socket } from "../../connectSocket";
+import Rec_profile from "../components/Rec_profile";
 function Chat() {
   const [dm_list, set_dm_list] = useState([]);
   const [verified, setVerifired] = useState(false);
@@ -13,6 +14,7 @@ function Chat() {
   const [searchResult, setSearchResult] = useState([]);
   const [searchResultvisible, setSearchResultVisible] = useState(false);
   const [chatting, setChatting] = useState(null);
+  const [section, setSection] = useState("A");
 
   useEffect(() => {
     if (!socket.connected) {
@@ -139,11 +141,15 @@ function Chat() {
       )}
 
       <div
-        className={`font-mono bg-[#F9F5EC] h-screen ${
+        className={`font-mono bg-[#F9F5EC] h-screen w-screen ${
           searchResultvisible ? "opacity-20" : ""
         } `}
       >
-        <nav className="w-full bg-[#F9F5EC] h-15 px-5 py-3 flex justify-between md:justify-around items-baseline border-b-2  f">
+        <nav
+          className={`w-full bg-[#F9F5EC] h-1/10 px-5 py-3  justify-between md:justify-around items-baseline border-b-2  ${
+            section == "B" ? "hidden md:flex" : "flex"
+          }`}
+        >
           <div className=" text-3xl font-bold italic">2dChat</div>
           <div className="flex gap-4 md:gap-10 items-center md:font-semibold  text-sm md:text-lg">
             <div className="">About Us</div>
@@ -151,59 +157,81 @@ function Chat() {
             <div className="">Profile</div>
           </div>
         </nav>
-        <div className="w-full flex items-center justify-center md:justify-start px-10 py-5 relative ">
+        <div className="h-9/10 ">
           <div
-            className=" bg-[#C3BBF0] px-4 py-3 border-2 flex items-center justify-center border-b-4"
-            onClick={() => searchUser()}
+            className={` ${
+              section === "A" ? "flex" : "hidden md:flex"
+            } w-full  items-center justify-center md:justify-start px-10  relative  h-2/15`}
           >
-            <Search />
+            <div
+              className=" bg-[#C3BBF0] px-4 py-3 border-2 flex items-center justify-center border-b-4"
+              onClick={() => searchUser()}
+            >
+              <Search />
+            </div>
+            <input
+              type="text"
+              className="bg-white py-3 px-5 md:w-1/2 border-2 border-b-4 border-e-4"
+              placeholder="Search for friends..."
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
-          <input
-            type="text"
-            className="bg-white py-3 px-5 md:w-1/2 border-2 border-b-4 border-e-4"
-            placeholder="Search for friends..."
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
 
-        <div className="w-full flex h-3/4 gap-5 relative">
-          <div className="md:w-1/4 w-full h-full  overflow-auto flex flex-col  py-2 gap-2 relative">
-            <div className="px-5 py-3 text-5xl text-slate-600">Chats</div>
+          <div className="w-full flex md:h-13/15  h-full gap-5 relative">
+            <div
+              className={`md:w-1/4 h-full  overflow-auto  flex-col  py-2 gap-2 relative  ${
+                section === "A" ? "flex w-screen" : "hidden md:flex w-screen"
+              }`}
+            >
+              <div className="px-5 py-3 text-5xl text-slate-600">Chats</div>
 
-            {dm_list.map((reciepent) => (
-              <div
-                className={`transition-all ease-in-out delay-100 grid grid-cols-3 grid-rows-2 px-3 py-5  shadow-xl  hover:bg-purple-50 ${
-                  chatting == reciepent._id
-                    ? "scale-105 bg-purple-200 hover:bg-purple-200"
-                    : "bg-white"
-                }`}
-                onClick={() => {
-                  setChatting(reciepent._id);
-                }}
-              >
-                <div className={`row-span-2 flex items-center justify-center `}>
-                  <div className="border px-5 py-3 rounded-full">U</div>
+              {dm_list.map((reciepent) => (
+                <div
+                  className={`transition-all ease-in-out delay-100 grid grid-cols-3 grid-rows-2 px-3 py-5  shadow-xl  hover:bg-purple-50 ${
+                    chatting == reciepent._id
+                      ? "scale-105 bg-purple-200 hover:bg-purple-200"
+                      : "bg-white"
+                  }`}
+                  onClick={() => {
+                    setChatting(reciepent);
+                    setSection("B");
+                  }}
+                >
+                  <div
+                    className={`row-span-2 flex items-center justify-center `}
+                  >
+                    <div className="border px-5 py-3 rounded-full">
+                      {reciepent.name[0]}
+                    </div>
+                  </div>
+                  <div className="overflow-hidden font-bold text-2xl h-8">
+                    {reciepent.name}
+                  </div>
+                  <div className="overflow-hidden text-gray-600 ml-2">
+                    yesterday
+                  </div>
+                  <div className="overflow-hidden text-sm italic mt-2">
+                    hello!
+                  </div>
                 </div>
-                <div className="overflow-hidden font-bold text-2xl h-8">
-                  {reciepent.name}
+              ))}
+            </div>
+
+            <div
+              className={`w-full md:w-3/4 h-full  md:border-2 ${
+                section === "B"
+                  ? "w-screen h-screen md:h-full"
+                  : "hidden md:block"
+              } `}
+            >
+              {chatting ? (
+                <Chatbox to={chatting} user={user} setSection={setSection} />
+              ) : (
+                <div className=" text-5xl flex items-center justify-center h-full">
+                  Nothing to show here...
                 </div>
-                <div className="overflow-hidden text-gray-600 ml-2">
-                  yesterday
-                </div>
-                <div className="overflow-hidden text-sm italic mt-2">
-                  hello!
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="w-full md:w-3/4 h-full  md:block md:border-2 ">
-            {chatting ? (
-              <Chatbox to={chatting} user={user} />
-            ) : (
-              <div className=" text-5xl flex items-center justify-center h-full">
-                Nothing to show here...
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
