@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { Send, Ellipsis, X, ArrowLeft } from "lucide-react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { socket } from "../../connectSocket";
 import Rec_profile from "./Rec_profile";
 function Chatbox({ to, user, setSection }) {
   const bottomref = useRef(null);
+  const bottominitialref = useState(null);
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [initial, setInitial] = useState(true);
   const roomid = [user, to._id].sort().join("_");
   useEffect(() => {
     const getChats = async () => {
@@ -23,10 +25,14 @@ function Chatbox({ to, user, setSection }) {
     getChats();
   }, [user, to]);
   useEffect(() => {
-    bottomref.current?.scrollIntoView({});
+    bottominitialref.current?.scrollIntoView();
   }, [chats]);
   useEffect(() => {
     const addMessage = (data) => {
+      if (user != data.created_by) {
+        toast(`${data.created_by} : ${data.chat} `);
+      }
+
       setChats((prev) => [...prev, data]);
     };
     socket.on("recieve-message", addMessage);
@@ -47,6 +53,7 @@ function Chatbox({ to, user, setSection }) {
         { withCredentials: true }
       );
       socket.emit("send-message", res.data.chat, roomid);
+
       setMessage("");
     } catch (err) {}
   };
@@ -65,6 +72,7 @@ function Chatbox({ to, user, setSection }) {
   }
   return (
     <>
+      <ToastContainer />
       <div className="h-full flex">
         <div
           className={`h-full  transition-all ease-linear duration-100  relative ${
@@ -125,7 +133,7 @@ function Chatbox({ to, user, setSection }) {
                 </div>
               </div>
             ))}
-            <div ref={bottomref} className="mb-5 md:mb-12"></div>
+            <div ref={bottominitialref} className="mb-5 md:mb-12"></div>
           </div>
           <div className="w-full flex flex-row-reverse items-center absolute bottom-0 left-0">
             <div

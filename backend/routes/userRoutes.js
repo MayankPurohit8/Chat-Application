@@ -14,4 +14,5 @@ router.get("/search", searchUser);
 router.get("/getChats", getChats);
 router.post("/send", sendMessage);
 router.get("/list", getlist);
+router.get("/profile", verifyAuth, getProfile);
 module.exports = router;

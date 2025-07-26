@@ -38,7 +38,7 @@ const getlist = async (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findbyId(req.id);
+    const user = await User.findById(req.id);
     return res
       .status(200)
       .json({ name: user.name, email: user.email, bio: user.bio });
