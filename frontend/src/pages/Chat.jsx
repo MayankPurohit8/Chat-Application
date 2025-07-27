@@ -5,10 +5,10 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { socket } from "../../connectSocket";
 import { Link } from "react-router";
-import Navbar from "../components/Navbar";
+import Login from "./Login";
 function Chat() {
   const [dm_list, set_dm_list] = useState([]);
-  const [verified, setVerifired] = useState(false);
+  const [verified, setVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState();
   const [search, setSearch] = useState("");
@@ -16,10 +16,12 @@ function Chat() {
   const [searchResultvisible, setSearchResultVisible] = useState(false);
   const [chatting, setChatting] = useState(null);
   const [section, setSection] = useState("A");
+  const [lastmessages, setlastmessages] = useState([]);
 
   useEffect(() => {
-    if (!socket.connected) {
+    if (verified && !socket.connected) {
       socket.connect();
+      socket.emit("join-private-room", user);
     }
     const verifyUser = async () => {
       try {
@@ -27,7 +29,7 @@ function Chat() {
         const res = await axios.get("http://localhost:5000/auth/verify", {
           withCredentials: true,
         });
-        setVerifired(true);
+        setVerified(true);
         setLoading(false);
         setUser(res.data.id);
       } catch (err) {
@@ -35,7 +37,7 @@ function Chat() {
       }
     };
     verifyUser();
-  }, []);
+  }, [verified]);
 
   useEffect(() => {
     const getList = async () => {
@@ -58,11 +60,40 @@ function Chat() {
       const roomid = [user, reciepent._id].sort().join("_");
       socket.emit("connect-to-room", roomid);
     });
+    console.log(dm_list);
   }, [dm_list]);
-  const searchUser = async () => {
+
+  useEffect(() => {
+    const getlastmessages = async () => {
+      try {
+        let res = await axios.get(
+          "http://localhost:5000/user/getlastmessages",
+          {
+            withCredentials: true,
+          }
+        );
+        console.log(res.data.list);
+        setlastmessages(res.data.list);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    if (user) getlastmessages();
+  }, [user]);
+
+  useEffect(() => {
+    const handlelist = (data) => {
+      if (!dm_list.find((u) => u._id === data._id)) tempAdd(data);
+    };
+    socket.on("add-to-list", handlelist);
+    return () => {
+      socket.off("add-to-list", handlelist);
+    };
+  }, [dm_list]);
+  const searchUser = async (search) => {
     try {
-      if (!search) {
-        toast.warn("Search for something");
+      if (search == "") {
+        setSearchResult([]);
         return;
       }
       const res = await axios.get("http://localhost:5000/user/search", {
@@ -70,13 +101,13 @@ function Chat() {
         withCredentials: true,
       });
       setSearchResult(res.data.users);
-      setSearchResultVisible(true);
     } catch (err) {
       console.log(err.response.data.message);
     }
   };
-  const tempAdd = async (user) => {
-    set_dm_list((prev) => [...prev, user]);
+  const tempAdd = async (u) => {
+    if (user && u._id === user) return;
+    set_dm_list((prev) => [...prev, u]);
     setSearchResultVisible(false);
   };
   if (loading) {
@@ -89,28 +120,12 @@ function Chat() {
       </>
     );
   }
-  if (!verified) {
-    return (
-      <>
-        <div className="h-screen w-screen flex items-center justify-center bg-[#F9F5EC] flex-col gap-5">
-          <div className="text-2xl font-semibold font-mono text-[#F47256]">
-            Cannot Verify the user!
-          </div>
-          <a
-            className="bg-[#8FB6F1]  px-5 py-3 rounded border-b-2 border-e-4 border-black shadow-black text-white  active:border-none"
-            href="/"
-          >
-            Home page
-          </a>
-        </div>
-      </>
-    );
-  }
+
   return (
     <>
       {searchResultvisible && (
-        <div className="fixed flex items-center justify-center h-screen w-screen z-10 px-5 py-3 mad:p-0">
-          <div className="bg-white py-3 px-5 md:w-1/3 w-full h-1/2 border-2 border-b-4 border-e-4 relative ">
+        <div className="fixed flex items-center justify-center h-screen w-screen z-10 px-5 py-3 mad:p-0 backdrop-blur-sm">
+          <div className="shadow-2xl bg-[#17191A] shadow-black border border-sky-500 py-10 md:px-10 px-5 md:w-1/2 w-full h-3/4  relative rounded-xl   ">
             <div
               onClick={() => {
                 setSearchResultVisible(false);
@@ -120,10 +135,24 @@ function Chat() {
             >
               <X />
             </div>
-            <div className="overflow-auto flex relative flex-col gap-3 h-full    w-full">
+            <div className="flex gap-5 px-5 py-3 bg-[#1D2127] w-full  rounded-xl">
+              <input
+                onChange={(e) => searchUser(e.target.value)}
+                type="text"
+                className=" placeholder:text-gray-500 text-gray-200 outline-none w-full  "
+                placeholder="Search for friends..."
+              />
+              <div
+                className="rounded-full hover:bg-gray-300 p-2"
+                onClick={() => searchUser()}
+              >
+                <Search color="gray" />
+              </div>
+            </div>
+            <div className="overflow-auto flex relative flex-col gap-3 h-full  w-full">
               {searchResult.map((user) => (
                 <div
-                  className="flex  gap-5 items-center px-5 py-5 item bg-white shadow-xl border-e-2 active:scale-105 hover:bg-purple-50"
+                  className="flex text-gray-500 gap-5 items-center px-5 py-5 item  hover:text-gray-400  active:scale-105 "
                   onClick={() => tempAdd(user)}
                 >
                   <div className=" flex items-center justify-center ">
@@ -140,71 +169,76 @@ function Chat() {
           </div>
         </div>
       )}
-
+      {!verified && <Login setVerified={setVerified} />}
       <div
-        className={`font-mono bg-[#F9F5EC] h-screen w-screen ${
-          searchResultvisible ? "opacity-20" : ""
+        className={`font-mono  h-screen w-screen ${
+          (searchResultvisible ? "opacity-20" : "", !verified ? "" : "")
         } `}
       >
-        <Navbar section={section} />
-        <div className="h-9/10 ">
-          <div
-            className={` ${
-              section === "A" ? "flex" : "hidden md:flex"
-            } w-full  items-center justify-center md:justify-start px-10  relative  h-2/15`}
-          >
+        <div className="h-full bg-[#1D2127] ">
+          <div className="w-full flex   h-full gap-5 relative">
             <div
-              className=" bg-[#C3BBF0] px-4 py-3 border-2 flex items-center justify-center border-b-4"
-              onClick={() => searchUser()}
-            >
-              <Search />
-            </div>
-            <input
-              type="text"
-              className="bg-white py-3 px-5 md:w-1/2 border-2 border-b-4 border-e-4"
-              placeholder="Search for friends..."
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <div className="w-full flex md:h-13/15  h-full gap-5 relative">
-            <div
-              className={`md:w-1/4 h-full  overflow-auto  flex-col  py-2 gap-2 relative  ${
+              className={`md:w-1/4 h-full  flex-col   gap-2 relative  ${
                 section === "A" ? "flex w-screen" : "hidden md:flex w-screen"
               }`}
             >
-              <div className="px-5 py-3 text-5xl text-slate-600">Chats</div>
-
-              {dm_list.map((reciepent) => (
+              <div className="w-full h-1/5 py-5 px-3 flex flex-col gap-4">
                 <div
-                  className={`transition-all ease-in-out delay-100 grid grid-cols-3 grid-rows-2 px-3 py-5  shadow-xl  hover:bg-purple-50 ${
-                    chatting == reciepent._id
-                      ? "scale-105 bg-purple-200 hover:bg-purple-200"
-                      : "bg-white"
-                  }`}
-                  onClick={() => {
-                    setChatting(reciepent);
-                    setSection("B");
-                  }}
+                  onClick={() => setSearchResultVisible(true)}
+                  className="rounded-md py-4 px-3 text-center text-xl text-white font-semibold bg-linear-to-r from-sky-500 to-[#2B32BD] border border-sky-500"
                 >
+                  Start New Chat
+                </div>
+                <div className=" py-3 px-3 flex gap-5  w-full bg-[#15191C] rounded-xl">
+                  <div className="rounded-full hover:bg-gray-300 p-2">
+                    <Search color="gray" />
+                  </div>
+                  <input
+                    type="text"
+                    className=" placeholder:text-gray-500 text-gray-200 outline-none w-full "
+                    placeholder="Search in chats..."
+                  />
+                </div>
+              </div>
+              <div className="h-4/5 overflow-y-auto">
+                <div className="px-5 py-3 text-5xl text-slate-600  mt-5 mb-5">
+                  Chats
+                </div>
+                {dm_list.map((reciepent) => (
                   <div
-                    className={`row-span-2 flex items-center justify-center `}
+                    className={`transition-all ease-in-out delay-100 grid grid-cols-3 grid-rows-2 px-2 py-3    ${
+                      chatting && chatting._id === reciepent._id
+                        ? "scale-105 bg-[#15191C] shadow-lg"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      setChatting(reciepent);
+                      setSection("B");
+                    }}
                   >
-                    <div className="border px-5 py-3 rounded-full">
-                      {reciepent.name[0]}
+                    <div
+                      className={`row-span-2 flex items-center justify-center `}
+                    >
+                      <div className="border px-5 py-3 rounded-full bg-white">
+                        {reciepent.name[0]}
+                      </div>
+                    </div>
+                    <div className="overflow-hidden font-bold text-lg text-gray-200 h-8">
+                      {reciepent.name}
+                    </div>
+                    <div className="overflow-hidden text-gray-600 ml-2 text-md">
+                      yesterday
+                    </div>
+                    <div className="overflow-hidden text-sm text-gray-400 italic mt-2">
+                      {lastmessages.find(
+                        (msg) =>
+                          msg.lastmessage?.created_by === reciepent._id ||
+                          msg.lastmessage?.created_to === reciepent._id
+                      )?.lastmessage?.chat || "----"}
                     </div>
                   </div>
-                  <div className="overflow-hidden font-bold text-2xl h-8">
-                    {reciepent.name}
-                  </div>
-                  <div className="overflow-hidden text-gray-600 ml-2">
-                    yesterday
-                  </div>
-                  <div className="overflow-hidden text-sm italic mt-2">
-                    hello!
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
             <div
@@ -215,7 +249,12 @@ function Chat() {
               } `}
             >
               {chatting ? (
-                <Chatbox to={chatting} user={user} setSection={setSection} />
+                <Chatbox
+                  to={chatting}
+                  user={user}
+                  setSection={setSection}
+                  tempAdd={tempAdd}
+                />
               ) : (
                 <div className=" text-5xl flex items-center justify-center h-full">
                   Nothing to show here...

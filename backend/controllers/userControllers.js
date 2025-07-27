@@ -6,8 +6,9 @@ const sendMessage = async (req, res) => {
     const created_by = req.body.user;
     const created_to = req.body.to;
     const chat = req.body.message;
-    const user = await User.findById(created_by);
-    const to = await User.findById(created_to);
+    const user = await User.findById(created_by).populate("name");
+    const to = await User.findById(created_to).populate("name");
+    console.log(user);
     const newChat = await Chat.create({
       created_by,
       created_to,
@@ -30,7 +31,7 @@ const getlist = async (req, res) => {
     const { user } = req.query;
 
     const currUser = await User.findById(user).populate("dm_list", "name");
-    list = currUser.dm_list;
+    list = currUser.dm_list.filter((u) => u != user._id);
 
     return res.status(200).json({ list: list });
   } catch (err) {}
@@ -84,6 +85,31 @@ const blockUser = async (req, res) => {};
 
 const unblockUser = async (req, res) => {};
 
+const getLastMessages = async (req, res) => {
+  try {
+    const user = await User.findById(req.id);
+    const list = user.dm_list;
+    const lastmessagelist = await Promise.all(
+      list.map(async (rec) => {
+        const lastmessage = await Chat.findOne({
+          $or: [
+            { created_by: req.id, created_to: rec },
+            { created_to: req.id, created_by: rec },
+          ],
+        })
+          .sort({ created_at: -1 })
+          .limit(1)
+          .lean();
+        return {
+          lastmessage,
+        };
+      })
+    );
+    console.log(lastmessagelist);
+    res.status(200).json({ list: lastmessagelist });
+  } catch (err) {}
+};
+
 module.exports = {
   sendMessage,
   getlist,
@@ -92,4 +118,5 @@ module.exports = {
   blockUser,
   searchUser,
   getChats,
+  getLastMessages,
 };

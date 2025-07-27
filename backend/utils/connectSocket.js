@@ -1,25 +1,45 @@
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
-
+import jwt from "jsonwebtoken";
+import User from "../models/userModel.js";
 const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
     origin: ["http://localhost:5173"],
+    credentials: true,
   },
 });
-
+const onlineusers = new Map();
 io.on("connection", (socket) => {
   console.log("A user connected", socket.id);
-
+  let token = socket.request.headers.cookie.split("token=")[1];
+  let decoded = jwt.verify(token, process.env.SECRET_KEY);
+  if (decoded) {
+    if (!onlineusers.has(decoded.id)) {
+      onlineusers.set(decoded.id, socket.id);
+    }
+    socket.join(decoded.id);
+    console.log(onlineusers);
+  }
   socket.on("connect-to-room", (data) => {
     console.log(`socket-${socket.id} connected to room-${data}`);
     socket.join(data);
   });
-  socket.on("send-message", (message, roomid) => {
+
+  socket.on("send-message", async (message, roomid) => {
     console.log(`message-${message} sent in room-${roomid}`);
+    let recid =
+      decoded.id != roomid.split("_")[0]
+        ? roomid.split("_")[0]
+        : roomid.split("_")[1];
+    if (onlineusers.has(recid)) {
+      const user = await User.findById(decoded.id);
+      console.log(user);
+      io.to(recid).emit("add-to-list", user);
+    }
     io.to(roomid).emit("recieve-message", message);
   });
 });

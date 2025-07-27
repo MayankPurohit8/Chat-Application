@@ -1,8 +1,128 @@
-Basic Features : 
+✅ Authentication & User Management
+User Registration & Login (JWT + bcrypt) - done
 
-Building a web chat application where users can chat in realtime.
-supports authentication and authorization.
-Can Share images.
-Users can search other users based on their names and profile.
-stores chat history
-creates chatboxes for different users
+Forgot Password / Reset Password 
+
+User profile with image, name, status - done
+
+Email or username-based login - done
+
+
+
+💬 1-on-1 Chat Features
+Real-time messaging (Socket.io) - done
+
+Message delivery and seen status
+
+Typing indicators
+
+Timestamps on messages - done
+
+Edit/Delete messages
+
+Message replies and forwards
+
+Star/Favorite messages
+
+Message search
+
+👥 Group Chat Features
+Create group chats
+
+Add/remove members
+
+Group name, description, and image
+
+Admin controls (kick, promote, mute)
+
+Mentions (@username)
+
+Group typing indicators
+
+Group muting/notification controls
+
+🗃️ Media & File Support
+Send/receive images, videos, documents
+
+Voice messages
+
+File previews and downloads
+
+Limit file size/type
+
+Drag & drop uploads
+
+📞 Voice & Video
+1-on-1 voice calls (WebRTC)
+
+1-on-1 video calls (WebRTC)
+
+Call timer, mute, end call
+
+🎨 UI/UX Features
+Responsive design (mobile/desktop) -done
+
+Dark mode / theme switcher
+
+Scroll to latest message - done
+
+New message indicator - oone
+
+Emoji picker
+
+Custom chat bubble styles
+
+🔔 Notifications
+In-app notifications
+
+Browser push notifications
+
+Email notifications for missed messages (Optional)
+
+🛡️ Security & Privacy
+JWT authentication - done
+
+End-to-end encryption (Optional)
+
+Self-destructing messages
+
+Block/report users
+
+XSS/CSRF protection
+
+Rate limiting / anti-spam
+
+🧠 Smart Features
+AI-powered smart replies
+
+Message auto-translation
+
+Sentiment analysis
+
+Chat summarization
+
+Chatbot integration
+
+🧰 Admin Panel
+View/manage users
+
+View/delete reported messages
+
+Ban/suspend users
+
+View chat logs or analytics
+
+⚙️ Additional Features
+Message scheduling
+
+Export chat history (PDF/CSV)
+
+Polls/surveys in chat
+
+Whiteboard/drawing share
+
+Location sharing
+
+Chat themes and personalization
+
+PWA support (installable app)

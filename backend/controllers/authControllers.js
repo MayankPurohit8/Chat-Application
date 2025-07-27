@@ -15,6 +15,12 @@ const register = async (req, res) => {
       email: email,
       password: hash,
     });
+    console.log(newUser);
+    token = jwt.sign(
+      { id: newUser._id, name: newUser.name },
+      process.env.SECRET_KEY
+    );
+    res.cookie("token", token, { maxage: 100000, httponly: true });
     return res.status(201).json({ message: "Email Registered Successfully" });
   } catch (err) {
     res.status(500).json({
