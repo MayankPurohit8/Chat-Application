@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Send, Ellipsis, X, ArrowLeft, Mic, Images } from "lucide-react";
+import { Send, Ellipsis, X, ArrowLeft, Mic, Images, Smile } from "lucide-react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
+import EmojiPicker, { Emoji } from "emoji-picker-react";
 import { socket } from "../../connectSocket";
 import Rec_profile from "./Rec_profile";
 function Chatbox({ to, user, setSection, tempAdd, dm_list }) {
@@ -10,6 +11,7 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list }) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [online, setOnline] = useState(false);
+  const [showemotab, setshowemotab] = useState(false);
   const roomid = [user, to._id].sort().join("_");
   useEffect(() => {
     const getChats = async () => {
@@ -29,11 +31,7 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list }) {
     });
   }, [chats]);
   useEffect(() => {
-    const addMessage = (data) => {
-      if (user != data.created_by) {
-        toast(`${data.created_by} : ${data.chat} `);
-      }
-
+    const addMessage = (data, name) => {
       setChats((prev) => [...prev, data]);
     };
     socket.on("recieve-message", addMessage);
@@ -73,6 +71,15 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list }) {
   }
   return (
     <>
+      <ToastContainer
+        theme="colored"
+        position="top-center"
+        pauseOnHover
+        stacked={true}
+        autoClose={2000}
+        hideProgressBar={true}
+        closeOnClick={true}
+      />
       <div className="h-full flex bg-[#17191A]">
         <div
           className={`h-full  transition-all ease-linear duration-100  relative ${
@@ -143,6 +150,16 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list }) {
               </div>
             ))}
             <div ref={bottomref} className="md:mb-20 mb-7"></div>
+            {showemotab && (
+              <div className="fixed  md:bottom-30 md:right-20 bottom-20">
+                <EmojiPicker
+                  theme="dark"
+                  onEmojiClick={(emo, event) =>
+                    setMessage((prev) => prev + emo.emoji)
+                  }
+                />
+              </div>
+            )}
           </div>
           <div className="absolute bottom-0 left-0 w-full md:px-10 md:py-5  px-1 py-2 ">
             <div className="bg-[#1D2127] rounded-xl md:px-7 px-3 py-2 md:py-5 flex w-full ring-2 shadow-2xl shadow-black md:gap-5 gap-1 items-center ">
@@ -160,6 +177,13 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list }) {
                   className="placeholder:text-gray-500 text-gray-200 outline-none w-full"
                 />
               </div>
+              <div
+                className=" hover:bg-gray-200 rounded-full p-2"
+                onClick={() => setshowemotab(!showemotab)}
+              >
+                {showemotab ? <X color="gray" /> : <Smile color="gray" />}
+              </div>
+
               <div className=" hover:bg-gray-200 rounded-full p-2">
                 <Images color="gray" />
               </div>

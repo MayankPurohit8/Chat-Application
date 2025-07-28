@@ -31,16 +31,17 @@ io.on("connection", (socket) => {
 
   socket.on("send-message", async (message, roomid) => {
     console.log(`message-${message} sent in room-${roomid}`);
+
+    const user = await User.findById(decoded.id);
     let recid =
       decoded.id != roomid.split("_")[0]
         ? roomid.split("_")[0]
         : roomid.split("_")[1];
     if (onlineusers.has(recid)) {
-      const user = await User.findById(decoded.id);
       console.log(user);
       io.to(recid).emit("add-to-list", user);
     }
-    io.to(roomid).emit("recieve-message", message);
+    io.to(roomid).emit("recieve-message", message, user.name);
   });
 });
 

@@ -1,11 +1,12 @@
-import { Search, ToolCase, X } from "lucide-react";
+import { Search, X, UserRoundCog, Hourglass } from "lucide-react";
 import Chatbox from "../components/Chatbox";
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { useEffect, useRef, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 import { socket } from "../../connectSocket";
 import { Link } from "react-router";
 import Login from "./Login";
+import Profile from "../components/Profile";
 function Chat() {
   const [dm_list, set_dm_list] = useState([]);
   const [verified, setVerified] = useState(false);
@@ -17,7 +18,8 @@ function Chat() {
   const [chatting, setChatting] = useState(null);
   const [section, setSection] = useState("A");
   const [lastmessages, setlastmessages] = useState([]);
-
+  const [profile, setProfile] = useState(false);
+  const lastmessref = useRef(lastmessages);
   useEffect(() => {
     if (verified && !socket.connected) {
       socket.connect();
@@ -38,7 +40,18 @@ function Chat() {
     };
     verifyUser();
   }, [verified]);
-
+  useEffect(() => {
+    const notify = (data, name) => {
+      if (user != data.created_by) {
+        toast(`${name} : ${data.chat} `);
+      }
+    };
+    socket.off("recieve-message", notify);
+    socket.on("recieve-message", notify);
+    return () => {
+      socket.off("recieve-message", notify);
+    };
+  }, [user]);
   useEffect(() => {
     const getList = async () => {
       try {
@@ -80,7 +93,9 @@ function Chat() {
     };
     if (user) getlastmessages();
   }, [user]);
-
+  useEffect(() => {
+    lastmessref.current = lastmessages;
+  }, [lastmessages]);
   useEffect(() => {
     const handlelist = (data) => {
       if (!dm_list.find((u) => u._id === data._id)) tempAdd(data);
@@ -90,6 +105,30 @@ function Chat() {
       socket.off("add-to-list", handlelist);
     };
   }, [dm_list]);
+
+  const isSameDay = (d1, d2) =>
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate();
+
+  const getLastMessageTime = (data) => {
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+
+    const mess = new Date(data);
+
+    if (isSameDay(now, mess)) {
+      return mess.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } else if (isSameDay(yesterday, mess)) {
+      return "yesterday";
+    } else {
+      return mess.toLocaleDateString([], { month: "short", day: "2-digit" });
+    }
+  };
   const searchUser = async (search) => {
     try {
       if (search == "") {
@@ -105,6 +144,28 @@ function Chat() {
       console.log(err.response.data.message);
     }
   };
+  useEffect(() => {
+    const handlelatestmess = (data) => {
+      let ind = lastmessref.current.findIndex((m) => {
+        let msg = m.lastmessage;
+        return (
+          (data.created_by === msg.created_by &&
+            data.created_to == msg.created_to) ||
+          (data.created_by === msg.created_to &&
+            data.created_to === msg.created_by)
+        );
+      });
+      setlastmessages((prev) => {
+        const updated = [...prev];
+        updated[ind] = { ...updated[ind], lastmessage: data };
+        return updated;
+      });
+    };
+    socket.on("recieve-message", handlelatestmess);
+    return () => {
+      socket.off("recieve-message", handlelatestmess);
+    };
+  }, []);
   const tempAdd = async (u) => {
     if (user && u._id === user) return;
     set_dm_list((prev) => [...prev, u]);
@@ -123,6 +184,16 @@ function Chat() {
 
   return (
     <>
+      <ToastContainer
+        theme="colored"
+        position="top-center"
+        pauseOnHover
+        stacked={true}
+        autoClose={2000}
+        hideProgressBar={true}
+        closeOnClick={true}
+      />
+      {profile && <Profile setProfile={setProfile} />}
       {searchResultvisible && (
         <div className="fixed flex items-center justify-center h-screen w-screen z-10 px-5 py-3 mad:p-0 backdrop-blur-sm">
           <div className="shadow-2xl bg-[#17191A] shadow-black border border-sky-500 py-10 md:px-10 px-5 md:w-1/2 w-full h-3/4  relative rounded-xl   ">
@@ -182,6 +253,19 @@ function Chat() {
                 section === "A" ? "flex w-screen" : "hidden md:flex w-screen"
               }`}
             >
+              <div className="flex gap-5 justify-between items-center rounded-b-2xl py-3 px-10 border text-center text-xl font-semibold bg-[#333c43]  ">
+                <div className=" text-3xl bg-linear-to-r from-sky-400 to-[#8d92e7] bg-clip-text text-transparent hover:bg-linear-to-l  ">
+                  Blab.com
+                </div>
+                <div className="flex gap-3 items-center">
+                  <div
+                    className=" p-2 rounded-full hover:bg-gray-400 "
+                    onClick={() => setProfile(true)}
+                  >
+                    <UserRoundCog color="white" />
+                  </div>
+                </div>
+              </div>
               <div className="w-full h-1/5 py-5 px-3 flex flex-col gap-4">
                 <div
                   onClick={() => setSearchResultVisible(true)}
@@ -227,9 +311,15 @@ function Chat() {
                       {reciepent.name}
                     </div>
                     <div className="overflow-hidden text-gray-600 ml-2 text-md">
-                      yesterday
+                      {getLastMessageTime(
+                        lastmessages.find(
+                          (msg) =>
+                            msg.lastmessage?.created_by === reciepent._id ||
+                            msg.lastmessage?.created_to === reciepent._id
+                        )?.lastmessage?.created_at
+                      )}
                     </div>
-                    <div className="overflow-hidden text-sm text-gray-400 italic mt-2">
+                    <div className="overflow-hidden h-5 w-full text-sm text-gray-400 italic mt-2">
                       {lastmessages.find(
                         (msg) =>
                           msg.lastmessage?.created_by === reciepent._id ||
