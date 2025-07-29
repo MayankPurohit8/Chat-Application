@@ -68,12 +68,12 @@ Scroll to latest message - done
 
 New message indicator - oone
 
-Emoji picker
+Emoji picker  -done
 
 Custom chat bubble styles
 
 🔔 Notifications
-In-app notifications
+In-app notifications - done 
 
 Browser push notifications
 

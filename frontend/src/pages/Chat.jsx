@@ -7,6 +7,7 @@ import { socket } from "../../connectSocket";
 import { Link } from "react-router";
 import Login from "./Login";
 import Profile from "../components/Profile";
+import MessageNot from "../components/messageNot";
 function Chat() {
   const [dm_list, set_dm_list] = useState([]);
   const [verified, setVerified] = useState(false);
@@ -43,7 +44,9 @@ function Chat() {
   useEffect(() => {
     const notify = (data, name) => {
       if (user != data.created_by) {
-        toast(`${name} : ${data.chat} `);
+        toast(<MessageNot user={name} message={data.chat} />, {
+          containerId: "chat",
+        });
       }
     };
     socket.off("recieve-message", notify);
@@ -185,11 +188,14 @@ function Chat() {
   return (
     <>
       <ToastContainer
+        containerId={"chat"}
+        toastClassName={() => "bg-transparent p-0 m-0 rounded-lg "}
+        bodyClassName={() => "p-0 m-0 bg-transparent"}
         theme="colored"
         position="top-center"
         pauseOnHover
         stacked={true}
-        autoClose={2000}
+        autoClose={5000}
         hideProgressBar={true}
         closeOnClick={true}
       />

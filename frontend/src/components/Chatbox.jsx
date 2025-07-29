@@ -71,15 +71,8 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list }) {
   }
   return (
     <>
-      <ToastContainer
-        theme="colored"
-        position="top-center"
-        pauseOnHover
-        stacked={true}
-        autoClose={2000}
-        hideProgressBar={true}
-        closeOnClick={true}
-      />
+      <ToastContainer />
+
       <div className="h-full flex bg-[#17191A]">
         <div
           className={`h-full  transition-all ease-linear duration-100  relative ${
