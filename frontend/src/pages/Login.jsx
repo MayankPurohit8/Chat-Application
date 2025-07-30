@@ -4,7 +4,7 @@ import { Bounce, toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router";
 import { socket } from "../../connectSocket";
 import { Eye, EyeOff } from "lucide-react";
-function Login({ setVerified }) {
+function Login({ setVerified, setshowPostLogin }) {
   const navigate = useNavigate();
   const [login, setLogin] = useState(true);
   const [name, setName] = useState("");
@@ -42,6 +42,7 @@ function Login({ setVerified }) {
       setName("");
       setPassword("");
       setVerified(true);
+      setshowPostLogin(true);
     } catch (err) {
       console.log(err.response);
       toast.error(err.response.data.message);

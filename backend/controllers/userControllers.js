@@ -30,7 +30,7 @@ const getlist = async (req, res) => {
   try {
     const { user } = req.query;
 
-    const currUser = await User.findById(user).populate("dm_list", "name");
+    const currUser = await User.findById(user).populate("dm_list", "-password");
     list = currUser.dm_list.filter((u) => u != user._id);
 
     return res.status(200).json({ list: list });
@@ -40,9 +40,13 @@ const getlist = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.id);
-    return res
-      .status(200)
-      .json({ name: user.name, email: user.email, bio: user.bio });
+    return res.status(200).json({
+      name: user.name,
+      email: user.email,
+      bio: user.bio,
+      username: user.username,
+      id: user._id,
+    });
   } catch (err) {}
 };
 
@@ -79,7 +83,14 @@ const getChats = async (req, res) => {
     return res.status(200).json({ chats: chats });
   } catch (err) {}
 };
-const updateProfile = async (req, res) => {};
+const updateName = async (req, res) => {
+  try {
+    const { user, newname } = req.query;
+    let userWithSameName = User.findOne("Name");
+  } catch (err) {
+    return res.status(500);
+  }
+};
 
 const blockUser = async (req, res) => {};
 
@@ -110,13 +121,62 @@ const getLastMessages = async (req, res) => {
   } catch (err) {}
 };
 
+const checkValidUsername = async (req, res) => {
+  try {
+    const { username } = req.query;
+    const is = await User.findOne({ username: username });
+    if (is) {
+      return res.status(400).json({ message: "already exists" });
+    }
+    return res.status(200).json({ message: "ok" });
+  } catch (err) {
+    return res.status(500).json({ message: "already exists" });
+  }
+};
+
+const checkValidemail = async (req, res) => {
+  try {
+    const { username } = req.query;
+    const is = await User.findOne({ email: email });
+    if (is) {
+      return res.status(400);
+    }
+    return res.status(201);
+  } catch (err) {
+    return res.status(500);
+  }
+};
+
+const updateProfile = async (req, res) => {
+  try {
+    console.log(req.body);
+    const { userid, username, name, email, bio } = req.body;
+    const updateField = {};
+    if (username) updateField.username = username;
+    if (name) updateField.name = name;
+    if (email) updateField.email = email;
+    if (bio) updateField.bio = bio;
+
+    let updatedProfile = await User.findByIdAndUpdate(userid, {
+      $set: updateField,
+    });
+    return res
+      .status(200)
+      .json({ message: "Profile updated", profile: updatedProfile });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "server error" });
+  }
+};
 module.exports = {
   sendMessage,
   getlist,
   getProfile,
-  updateProfile,
+  updateName,
   blockUser,
   searchUser,
   getChats,
   getLastMessages,
+  checkValidUsername,
+  updateProfile,
 };

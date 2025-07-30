@@ -8,6 +8,7 @@ import { Link } from "react-router";
 import Login from "./Login";
 import Profile from "../components/Profile";
 import MessageNot from "../components/messageNot";
+import PostLogin from "../components/Postlogin";
 function Chat() {
   const [dm_list, set_dm_list] = useState([]);
   const [verified, setVerified] = useState(false);
@@ -21,6 +22,7 @@ function Chat() {
   const [lastmessages, setlastmessages] = useState([]);
   const [profile, setProfile] = useState(false);
   const lastmessref = useRef(lastmessages);
+  const [showPostLogin, setshowPostLogin] = useState(false);
   useEffect(() => {
     if (verified && !socket.connected) {
       socket.connect();
@@ -246,7 +248,12 @@ function Chat() {
           </div>
         </div>
       )}
-      {!verified && <Login setVerified={setVerified} />}
+      {!verified && (
+        <Login setVerified={setVerified} setshowPostLogin={setshowPostLogin} />
+      )}
+      {verified && showPostLogin && (
+        <PostLogin setshowPostLogin={setshowPostLogin} userid={user} />
+      )}
       <div
         className={`font-mono  h-screen w-screen ${
           (searchResultvisible ? "opacity-20" : "", !verified ? "" : "")

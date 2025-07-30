@@ -2,10 +2,11 @@ const mongoose = require("mongoose");
 
 const UserSchema = mongoose.Schema({
   name: { type: String },
-  email: { type: String },
+  username: { type: String, unique: true },
+  email: { type: String, unique: true },
   password: { type: String },
   profile_pic: { type: String },
-  Bio: { type: String },
+  bio: { type: String },
   dm_list: [{ type: mongoose.Types.ObjectId, ref: "User" }],
 });
 

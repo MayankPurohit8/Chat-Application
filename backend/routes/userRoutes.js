@@ -4,11 +4,12 @@ const {
   sendMessage,
   getlist,
   getProfile,
-  updateProfile,
   blockUser,
   searchUser,
   getChats,
   getLastMessages,
+  checkValidUsername,
+  updateProfile,
 } = require("../controllers/userControllers");
 
 router.get("/search", searchUser);
@@ -17,4 +18,6 @@ router.post("/send", sendMessage);
 router.get("/list", getlist);
 router.get("/profile", verifyAuth, getProfile);
 router.get("/getlastmessages", verifyAuth, getLastMessages);
+router.get("/checkvalidusername", checkValidUsername);
+router.put("/updateprofile", updateProfile);
 module.exports = router;

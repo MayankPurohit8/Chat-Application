@@ -144,7 +144,7 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list }) {
             ))}
             <div ref={bottomref} className="md:mb-20 mb-7"></div>
             {showemotab && (
-              <div className="fixed  md:bottom-30 md:right-20 bottom-20">
+              <div className="absolute  md:bottom-30 md:right-20 bottom-20">
                 <EmojiPicker
                   theme="dark"
                   onEmojiClick={(emo, event) =>
@@ -192,7 +192,7 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list }) {
           </div>
         </div>
 
-        <div className={`h-full md:w-1/3 ${recProfile ? "" : "hidden"}`}>
+        <div className={`h-full md:w-1/3 w-full ${recProfile ? "" : "hidden"}`}>
           <div
             className="fixed mt-5  ml-5 bg-gray-500 text-white  rounded-full p-3 "
             onClick={() => {
