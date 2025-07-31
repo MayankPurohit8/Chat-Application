@@ -12,6 +12,7 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
   const [loading, setLoading] = useState(false);
   const [online, setOnline] = useState(false);
   const [showemotab, setshowemotab] = useState(false);
+  const [typing, setTyping] = useState(false);
   const roomid = [user, to._id].sort().join("_");
   useEffect(() => {
     onlineUsers?.includes(to._id) ? setOnline(true) : setOnline(false);
@@ -61,6 +62,29 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
   };
   const [senderId, setsenderId] = useState(user);
   const [recProfile, setrecProfile] = useState(false);
+  useEffect(() => {
+    if (message != "") socket.emit("typing", roomid, user);
+  }, [message]);
+
+  useEffect(() => {
+    let timeoutid;
+    const handletype = (data) => {
+      if (data != user) {
+        setTyping(true);
+        clearTimeout(timeoutid);
+        timeoutid = setTimeout(() => {
+          setTyping(false);
+        }, 1000);
+      }
+    };
+
+    socket.on("user-typing", handletype);
+
+    return () => {
+      socket.off("user-typing", handletype);
+      clearTimeout(timeoutid);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -107,7 +131,8 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
             {online && (
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <div className="text-green-500">online</div>
+                {!typing && <div className="text-green-500 ">online</div>}
+                {typing && <div className="text-green-500 ">..typing</div>}
               </div>
             )}
           </div>

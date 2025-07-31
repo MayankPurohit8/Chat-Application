@@ -48,6 +48,10 @@ io.on("connection", (socket) => {
     }
     io.to(roomid).emit("recieve-message", message, user.name);
   });
+
+  socket.on("typing", (roomid, id) => {
+    io.to(roomid).emit("user-typing", id);
+  });
   socket.on("disconnect", () => {
     console.log("user disconnected / loggged out");
 
