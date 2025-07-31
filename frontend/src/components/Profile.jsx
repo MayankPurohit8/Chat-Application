@@ -1,14 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { socket } from "../../connectSocket";
 import axios from "axios";
 import {
+  Binary,
   ChevronLeft,
   ChevronRight,
   CircleCheck,
   CircleX,
+  Image,
   LogOut,
+  Trash,
+  Trash2,
+  X,
 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
+
 function Profile({ setProfile, setVerified, setAll }) {
   const [user, setUser] = useState(null);
   const [name, setName] = useState("");
@@ -17,6 +23,12 @@ function Profile({ setProfile, setVerified, setAll }) {
   const [selection, setSelection] = useState(0);
   const [save, setSave] = useState(false);
   const [validusername, setValidusername] = useState(false);
+  const [editpic, seteditpic] = useState(false);
+  const [image, setImage] = useState(null);
+  const imageref = useRef(null);
+  const [imageprev, setImageprev] = useState(false);
+  const [prevURL, setprevURL] = useState(null);
+
   const getProfile = async () => {
     try {
       let res = await axios.get("http://localhost:5000/user/profile", {
@@ -114,11 +126,98 @@ function Profile({ setProfile, setVerified, setAll }) {
       console.log(err);
     }
   };
+  const handlefile = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file[0]);
+      setprevURL(URL.createObjectURL(file));
+    }
+    setImageprev(true);
+  };
+  const handleUpload = async () => {
+    try {
+      const formData = new formData();
+      formData.append("image", dp);
+
+      let res = axios.post(
+        "",
+        formData <
+          {
+            Headers: {
+              "content-type": "multipart/form-data",
+            },
+          }
+      );
+    } catch (err) {}
+  };
   return (
     <>
       <ToastContainer theme="colored" />
       <div className="fixed h-screen w-screen border bg-transparent backdrop-blur-2xl z-10 flex items-center justify-center ">
-        <div className="py-5  md:w-1/3 md:h-8/10 w-full h-4/6  bg-[#17191A] shadow-2xl border-2 border-sky-500 rounded-xl flex flex-col gap-20">
+        <div className="overflow-hidden relative py-5  md:w-1/3 md:h-8/10 w-full h-4/6  bg-[#17191A] shadow-2xl border-2 border-sky-500 rounded-xl flex flex-col gap-20">
+          <div
+            className={`p-2 transition-all absolute bg-[#1d2127] h-4/10 w-full bottom-0 left-0 rounded-b-2xl ${
+              editpic ? "translate-y-0 " : "translate-y-full"
+            }`}
+          >
+            <div className=" text-2xl text-gray-400 text-center h-2/10">
+              Edit Profile Picture
+              <div
+                className="absolute right-5 top-4  "
+                onClick={() => seteditpic(false)}
+              >
+                <X />
+              </div>
+            </div>
+
+            <div className="flex flex-col  px-5  py-6 items-center h-8/10 justify-around text-lg cursor-pointer">
+              <div
+                className="text-gray-500 flex justify-around w-full bg-[#2a3038] py-3 rounded-xl active:scale-105"
+                onClick={() => imageref.current.click()}
+              >
+                Choose Photo <Image />
+                <input
+                  type="file"
+                  className="hidden"
+                  ref={imageref}
+                  onChange={(e) => handlefile(e)}
+                />
+              </div>
+              <div className="text-red-500 flex justify-around w-full bg-[#2a3038] py-3 rounded-xl  active:scale-105">
+                Delete Photo <Trash2 />
+              </div>
+            </div>
+          </div>
+          <div
+            className={`p-2 transition-all absolute bg-[#1d2127] h-8/10 w-full bottom-0 left-0 rounded-b-2xl ${
+              imageprev ? "translate-y-0 " : "translate-y-full"
+            }`}
+          >
+            <div className="text-center py-3 text-xl text-gray-400">
+              Image Preview
+            </div>
+            <div className=" h-8/10 w-full mx-5 my-3 rounded-xl relative ">
+              <img
+                src={prevURL}
+                alt="pic"
+                className="w-full h-full object-contain"
+              />
+              <div className="absolute bottom-0 flex w-full justify-around bg- bg-[#1d2127d0] py-3 text-lg">
+                <div
+                  className="text-red-500"
+                  onClick={() => {
+                    setImageprev(null);
+                    setImage(null);
+                  }}
+                >
+                  Cancel
+                </div>
+                <div className="text-gray-400" onClick={() => handleUpload()}>
+                  Choose
+                </div>
+              </div>
+            </div>
+          </div>
           {selection == 0 && (
             <div className=" h-1/10 flex justify-around items-center">
               <div
@@ -147,7 +246,14 @@ function Profile({ setProfile, setVerified, setAll }) {
                 <div className="bg-white text-center p-15 rounded-full flex items-center justify-center text-3xl font-bold">
                   M
                 </div>
-                <div className="h-1/5 text-sky-500">Edit</div>
+                <div
+                  className="h-1/5 text-sky-500"
+                  onClick={() => {
+                    seteditpic(true);
+                  }}
+                >
+                  Edit
+                </div>
               </div>
               <div className="h-2/3  w-full flex flex-col px-5 gap-5">
                 <div className="">

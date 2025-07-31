@@ -8,6 +8,7 @@ const { Server } = require("socket.io");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const { app, server } = require("./utils/connectSocket");
+const multer = require("multer");
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -16,9 +17,11 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+
 dotenv.config();
 connectDB();
 
+const upload = multer({ dest: "uploads/" });
 app.get("/", (req, res) => {
   res.send("This is backend");
 });
