@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
-import Navbar from "./Navbar";
+import { socket } from "../../connectSocket";
 import axios from "axios";
-import { ChevronLeft, ChevronRight, CircleCheck, CircleX } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  CircleCheck,
+  CircleX,
+  LogOut,
+} from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
-function Profile({ setProfile }) {
+function Profile({ setProfile, setVerified, setAll }) {
   const [user, setUser] = useState(null);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -90,21 +96,48 @@ function Profile({ setProfile }) {
     } catch (err) {}
   };
 
+  const logout = async (req, res) => {
+    try {
+      let res = await axios.post(
+        "http://localhost:5000/user/logout",
+        {},
+        { withCredentials: true }
+      );
+      console.log(res);
+      toast.success("Logged Out");
+      setVerified(false);
+      setUser(null);
+      setProfile(false);
+      socket.disconnect();
+      setAll(null);
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <>
       <ToastContainer theme="colored" />
       <div className="fixed h-screen w-screen border bg-transparent backdrop-blur-2xl z-10 flex items-center justify-center ">
-        <div className="py-5 md:w-1/3 md:h-8/10 w-full h-4/6  bg-[#17191A] shadow-2xl border-2 border-sky-500 rounded-xl flex flex-col gap-20">
+        <div className="py-5  md:w-1/3 md:h-8/10 w-full h-4/6  bg-[#17191A] shadow-2xl border-2 border-sky-500 rounded-xl flex flex-col gap-20">
           {selection == 0 && (
-            <div className=" h-1/10">
+            <div className=" h-1/10 flex justify-around items-center">
               <div
-                className="fixed ml-5 my-1 p-1 rounded-full hover:bg-gray-500  text-gray-200"
+                className=" rounded-full hover:bg-gray-500  text-gray-200"
                 onClick={() => setProfile(false)}
               >
                 <ChevronLeft />
               </div>
               <div className="text-gray-400 text-center text-3xl font-semibold">
                 Profile
+              </div>
+              <div
+                className="flex   group relative rounded-xl text-gray-400 hover:text-red-500 "
+                onClick={() => logout()}
+              >
+                <LogOut size={25} />
+                <div className="group-hover:opacity-100 opacity-0 absolute text-sm -bottom-10 -left-5 rounded-3xl bg-gray-300 px-2 py-1 text-black transition-all  ">
+                  logout
+                </div>
               </div>
             </div>
           )}

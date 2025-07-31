@@ -10,6 +10,7 @@ const {
   getLastMessages,
   checkValidUsername,
   updateProfile,
+  logout,
 } = require("../controllers/userControllers");
 
 router.get("/search", searchUser);
@@ -20,4 +21,5 @@ router.get("/profile", verifyAuth, getProfile);
 router.get("/getlastmessages", verifyAuth, getLastMessages);
 router.get("/checkvalidusername", checkValidUsername);
 router.put("/updateprofile", updateProfile);
+router.post("/logout", logout);
 module.exports = router;

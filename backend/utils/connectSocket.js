@@ -12,10 +12,14 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
 const onlineusers = new Map();
+const getOnlineUserList = () => {
+  return Array.from(onlineusers.keys());
+};
 io.on("connection", (socket) => {
   console.log("A user connected", socket.id);
-  let token = socket.request.headers.cookie.split("token=")[1];
+  let token = socket.request.headers.cookie?.split("token=")[1];
   let decoded = jwt.verify(token, process.env.SECRET_KEY);
   if (decoded) {
     if (!onlineusers.has(decoded.id)) {
@@ -24,6 +28,7 @@ io.on("connection", (socket) => {
     socket.join(decoded.id);
     console.log(onlineusers);
   }
+  io.emit("online-users", getOnlineUserList());
   socket.on("connect-to-room", (data) => {
     console.log(`socket-${socket.id} connected to room-${data}`);
     socket.join(data);
@@ -42,6 +47,12 @@ io.on("connection", (socket) => {
       io.to(recid).emit("add-to-list", user);
     }
     io.to(roomid).emit("recieve-message", message, user.name);
+  });
+  socket.on("disconnect", () => {
+    console.log("user disconnected / loggged out");
+
+    onlineusers.delete(decoded.id);
+    io.emit("online-users", getOnlineUserList());
   });
 });
 

@@ -168,6 +168,14 @@ const updateProfile = async (req, res) => {
     return res.status(500).json({ message: "server error" });
   }
 };
+const logout = (req, res) => {
+  try {
+    res.clearCookie("token");
+    return res.status(200).json({ messag: "logged out successfully" });
+  } catch (err) {
+    console.log(err);
+  }
+};
 module.exports = {
   sendMessage,
   getlist,
@@ -179,4 +187,5 @@ module.exports = {
   getLastMessages,
   checkValidUsername,
   updateProfile,
+  logout,
 };

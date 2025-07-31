@@ -5,7 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import EmojiPicker, { Emoji } from "emoji-picker-react";
 import { socket } from "../../connectSocket";
 import Rec_profile from "./Rec_profile";
-function Chatbox({ to, user, setSection, tempAdd, dm_list }) {
+function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
   const bottomref = useRef(null);
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState("");
@@ -13,6 +13,9 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list }) {
   const [online, setOnline] = useState(false);
   const [showemotab, setshowemotab] = useState(false);
   const roomid = [user, to._id].sort().join("_");
+  useEffect(() => {
+    onlineUsers?.includes(to._id) ? setOnline(true) : setOnline(false);
+  }, [onlineUsers]);
   useEffect(() => {
     const getChats = async () => {
       try {

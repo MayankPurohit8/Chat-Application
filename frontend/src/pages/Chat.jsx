@@ -23,6 +23,7 @@ function Chat() {
   const [profile, setProfile] = useState(false);
   const lastmessref = useRef(lastmessages);
   const [showPostLogin, setshowPostLogin] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState();
   useEffect(() => {
     if (verified && !socket.connected) {
       socket.connect();
@@ -43,6 +44,16 @@ function Chat() {
     };
     verifyUser();
   }, [verified]);
+  useEffect(() => {
+    const fetchOnlineUsers = (data) => {
+      console.log(data);
+      setOnlineUsers([...data]);
+    };
+    socket.on("online-users", fetchOnlineUsers);
+    return () => {
+      socket.off("online-users", fetchOnlineUsers);
+    };
+  }, [user]);
   useEffect(() => {
     const notify = (data, name) => {
       if (user != data.created_by) {
@@ -201,7 +212,13 @@ function Chat() {
         hideProgressBar={true}
         closeOnClick={true}
       />
-      {profile && <Profile setProfile={setProfile} />}
+      {profile && (
+        <Profile
+          setProfile={setProfile}
+          setVerified={setVerified}
+          setAll={setUser}
+        />
+      )}
       {searchResultvisible && (
         <div className="fixed flex items-center justify-center h-screen w-screen z-10 px-5 py-3 mad:p-0 backdrop-blur-sm">
           <div className="shadow-2xl bg-[#17191A] shadow-black border border-sky-500 py-10 md:px-10 px-5 md:w-1/2 w-full h-3/4  relative rounded-xl   ">
@@ -357,6 +374,7 @@ function Chat() {
                   user={user}
                   setSection={setSection}
                   tempAdd={tempAdd}
+                  onlineUsers={onlineUsers}
                 />
               ) : (
                 <div className=" text-5xl flex items-center justify-center h-full">
