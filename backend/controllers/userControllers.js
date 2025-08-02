@@ -1,18 +1,29 @@
 const Chat = require("../models/chatModel");
 const User = require("../models/userModel");
 const io = require("../server");
+const { uploadFile, deleteFile } = require("../utils/upload");
 const sendMessage = async (req, res) => {
   try {
-    const created_by = req.body.user;
+    const created_by = req.id;
     const created_to = req.body.to;
-    const chat = req.body.message;
+    let chat = "";
+    const type = req.body.type;
     const user = await User.findById(created_by).populate("name");
     const to = await User.findById(created_to).populate("name");
-    console.log(user);
+    if (type == "image") {
+      console.log(req.file);
+      const filepath = req.file?.path;
+      const result = await uploadFile(filepath);
+
+      chat = result.secure_url;
+    } else {
+      chat = req.body.message;
+    }
     const newChat = await Chat.create({
       created_by,
       created_to,
       chat,
+      type,
     });
     if (!user.dm_list.includes(created_to)) {
       user.dm_list.push(created_to);
@@ -30,7 +41,10 @@ const getlist = async (req, res) => {
   try {
     const { user } = req.query;
 
-    const currUser = await User.findById(user).populate("dm_list", "-password");
+    const currUser = await User.findById(user).populate(
+      "dm_list",
+      "-password -dm_list -dp_id"
+    );
     list = currUser.dm_list.filter((u) => u != user._id);
 
     return res.status(200).json({ list: list });
@@ -46,6 +60,7 @@ const getProfile = async (req, res) => {
       bio: user.bio,
       username: user.username,
       id: user._id,
+      dp: user.dp,
     });
   } catch (err) {}
 };
@@ -171,9 +186,50 @@ const updateProfile = async (req, res) => {
 const logout = (req, res) => {
   try {
     res.clearCookie("token");
-    return res.status(200).json({ messag: "logged out successfully" });
+    return res.status(200).json({ message: "logged out successfully" });
   } catch (err) {
     console.log(err);
+  }
+};
+
+const editDp = async (req, res) => {
+  try {
+    const filepath = req.file?.path;
+    if (!filepath) {
+      return res.status(400).json({ message: "No file provided" });
+    }
+    const result = await uploadFile(filepath);
+    const olduser = await User.findById(req.id);
+    const olddp = olduser.dp_id;
+    if (olddp) {
+      await deleteFile(olddp);
+    }
+    const user = await User.findByIdAndUpdate(req.id, {
+      dp: result.secure_url,
+      dp_id: result.public_id,
+    });
+    return res
+      .status(200)
+      .json({ message: "uploaded successfully", link: result.secure_url });
+  } catch (err) {
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const deleteDp = async (req, res) => {
+  try {
+    const user = await User.findById(req.id);
+    const dpid = user.dp_id;
+    await deleteFile(dpid);
+    const updateduser = await User.findByIdAndUpdate(req.id, {
+      dp: "",
+      dp_id: "",
+    });
+    return res.status(200).json({ message: "image deleted" });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "something went wrong white deleteing" });
   }
 };
 module.exports = {
@@ -188,4 +244,6 @@ module.exports = {
   checkValidUsername,
   updateProfile,
   logout,
+  editDp,
+  deleteDp,
 };

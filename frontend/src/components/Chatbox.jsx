@@ -13,6 +13,11 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
   const [online, setOnline] = useState(false);
   const [showemotab, setshowemotab] = useState(false);
   const [typing, setTyping] = useState(false);
+  const [image, setImage] = useState(null);
+  const [imageprev, setImagePrev] = useState(false);
+  const imageref = useRef(null);
+  const [imageprevurl, setImageprevurl] = useState(null);
+  const [messageType, setMessageType] = useState("text");
   const roomid = [user, to._id].sort().join("_");
   useEffect(() => {
     onlineUsers?.includes(to._id) ? setOnline(true) : setOnline(false);
@@ -46,18 +51,27 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
 
   const sendMessage = async () => {
     try {
-      if (message == "") {
+      if (message == "" && !image) {
         toast.warn("type something");
         return;
       }
-      let res = await axios.post(
-        "http://localhost:5000/user/send",
-        { user, to: to._id, message },
-        { withCredentials: true }
-      );
+      const formData = new FormData();
+      if (image) {
+        formData.append("image", image);
+        formData.append("type", "image");
+      } else {
+        formData.append("message", message);
+        formData.append("type", "text");
+      }
+      formData.append("to", to._id);
+      let res = await axios.post("http://localhost:5000/user/send", formData, {
+        withCredentials: true,
+      });
       socket.emit("send-message", res.data.chat, roomid);
-
+      setMessageType("text");
       setMessage("");
+      setImagePrev(false);
+      setImage(null);
     } catch (err) {}
   };
   const [senderId, setsenderId] = useState(user);
@@ -86,6 +100,16 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
     };
   }, []);
 
+  const handleImage = (e) => {
+    let file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setImageprevurl(URL.createObjectURL(file));
+      setImagePrev(true);
+      setMessage("");
+    }
+  };
+
   if (loading) {
     return (
       <>
@@ -107,24 +131,32 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
           }`}
         >
           <div
-            className={` flex md:px-20  py-5 px-5 w-full  justify-between items-center bg-[#1D2127] border-b-2 shadow-2xl ${
+            className={` flex md:px-20  py-5 px-5 w-full h-1/10 justify-between items-center bg-[#1D2127] border-b-2 shadow-2xl ${
               recProfile ? "hidden" : ""
             }`}
           >
             <div
-              className="md:hidden block p-2 rounded-full hover:bg-gray-200 "
+              className="md:hidden block p-2 rounded-full hover:bg-gray-200 h-full"
               onClick={() => setSection("A")}
             >
               <ArrowLeft color="grey" />
             </div>
             <div
-              className="flex md:gap-3 gap-2 justify-around items-center    "
+              className="flex md:gap-3 gap-2 justify-around items-center h-full  "
               onClick={() => {
                 setrecProfile(!recProfile);
               }}
             >
-              <div className="border px-4 py-2 rounded-full bg-white">
-                {to.name[0].toUpperCase()}
+              <div className="border  rounded-full  h-full w-full bg-white">
+                {to?.dp != "" ? (
+                  <img
+                    src={to.dp}
+                    alt=""
+                    className="w-full h-full ovject-contain rounded-full"
+                  />
+                ) : (
+                  to.name[0]
+                )}
               </div>
               <div className="font-bold text-gray-200 ">{to.name}</div>
             </div>
@@ -145,23 +177,27 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
                     : "justify-start "
                 }`}
               >
-                {senderId === chat.created_by ? null : (
-                  <div className="border px-5 py-3 rounded-full bg-white font-bold">
-                    {to.name[0].toUpperCase()}
-                  </div>
-                )}
-
                 <div
-                  className={` md:max-w-2/3 md:min-w-1/2   max-w-4/5 min-w-2/3  py-3 px-5 rounded-xl  text-lg text-gray-100  ${
+                  className={` md:max-w-1/3 md:min-w-1/2 ${
+                    chat.type === "image" ? "p-1 " : "py-3 px-5"
+                  }   max-w-4/5 min-w-2/3    rounded-xl  text-lg text-gray-100  ${
                     senderId === chat.created_by
                       ? " bg-[#2B32BD]  "
                       : " bg-[#1D2127]  "
                   }`}
                 >
-                  <div className="px-5 w-full break-words whitespace-normal">
-                    {chat.chat}
+                  <div className=" w-full   break-words whitespace-normal  ">
+                    {chat.type == "image" ? (
+                      <img
+                        src={chat.chat}
+                        alt=""
+                        className="rounded-2xl object-cover "
+                      />
+                    ) : (
+                      chat.chat
+                    )}
                   </div>
-                  <div className="text-gray-400 text-sm font-sans font-extralight text-shadow-none ">
+                  <div className="text-gray-400 text-sm font-sans p-1 font-extralight text-shadow-none ">
                     {new Date(chat.created_at).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -183,6 +219,18 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
             )}
           </div>
           <div className="absolute bottom-0 left-0 w-full md:px-10 md:py-5  px-1 py-2 ">
+            {imageprev && (
+              <div className="h-full w-full bg-transparent rounded-t-3xl px-10 py-3 flex  justify-between items-center">
+                <div className="h-full w-1/5 ">
+                  <img
+                    src={imageprevurl}
+                    alt=""
+                    className="md:w-full h-full object-contain rounded-xl"
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="bg-[#1D2127] rounded-xl md:px-7 px-3 py-2 md:py-5 flex w-full ring-2 shadow-2xl shadow-black md:gap-5 gap-1 items-center ">
               <div className="p-2 rounded-full  hover:bg-gray-200">
                 <Mic color="gray" />
@@ -194,8 +242,11 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
                   }}
                   value={message}
                   type="text"
-                  placeholder="type something... "
-                  className="placeholder:text-gray-500 text-gray-200 outline-none w-full"
+                  disabled={imageprev}
+                  placeholder={!image && "type something... "}
+                  className={`placeholder:text-gray-500 text-gray-200 outline-none w-full ${
+                    image ? "cursor-not-allowed" : ""
+                  }`}
                 />
               </div>
               <div
@@ -205,8 +256,29 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
                 {showemotab ? <X color="gray" /> : <Smile color="gray" />}
               </div>
 
-              <div className=" hover:bg-gray-200 rounded-full p-2">
-                <Images color="gray" />
+              <div className=" hover:bg-gray-200 rounded-full p-2 ">
+                {imageprev ? (
+                  <X
+                    color="gray"
+                    onClick={() => {
+                      setImagePrev(false);
+                      setImage(null);
+                    }}
+                  />
+                ) : (
+                  <Images
+                    color="gray"
+                    onClick={() => imageref.current?.click()}
+                  />
+                )}{" "}
+                <input
+                  type="file"
+                  name=""
+                  id=""
+                  className="hidden"
+                  ref={imageref}
+                  onChange={(e) => handleImage(e)}
+                />
               </div>
               <div
                 className=" hover:bg-gray-200 rounded-full p-2"

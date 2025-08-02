@@ -1,4 +1,4 @@
-import { Search, X, UserRoundCog, Hourglass } from "lucide-react";
+import { Search, X, UserRoundCog, Hourglass, Images } from "lucide-react";
 import Chatbox from "../components/Chatbox";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
@@ -57,9 +57,15 @@ function Chat() {
   useEffect(() => {
     const notify = (data, name) => {
       if (user != data.created_by) {
-        toast(<MessageNot user={name} message={data.chat} />, {
-          containerId: "chat",
-        });
+        toast(
+          <MessageNot
+            user={name}
+            message={data.type == "text" ? data.chat : "image"}
+          />,
+          {
+            containerId: "chat",
+          }
+        );
       }
     };
     socket.off("recieve-message", notify);
@@ -333,8 +339,16 @@ function Chat() {
                     <div
                       className={`row-span-2 flex items-center justify-center `}
                     >
-                      <div className="border px-5 py-3 rounded-full bg-white">
-                        {reciepent.name[0]}
+                      <div className="border w-20 h-20  rounded-full bg-white">
+                        {reciepent?.dp != "" ? (
+                          <img
+                            src={reciepent.dp}
+                            alt=""
+                            className="w-full h-full ovject-contain rounded-full"
+                          />
+                        ) : (
+                          reciepent.name[0]
+                        )}
                       </div>
                     </div>
                     <div className="overflow-hidden font-bold text-lg text-gray-200 h-8">
@@ -350,11 +364,17 @@ function Chat() {
                       )}
                     </div>
                     <div className="overflow-hidden h-5 w-full text-sm text-gray-400 italic mt-2">
-                      {lastmessages.find(
-                        (msg) =>
-                          msg.lastmessage?.created_by === reciepent._id ||
-                          msg.lastmessage?.created_to === reciepent._id
-                      )?.lastmessage?.chat || "----"}
+                      {(() => {
+                        const found = lastmessages.find(
+                          (msg) =>
+                            msg.lastmessage?.created_by === reciepent._id ||
+                            msg.lastmessage?.created_to === reciepent._id
+                        );
+                        if (!found?.lastmessage) return "----";
+                        return found.lastmessage.type === "text"
+                          ? found.lastmessage.chat
+                          : "image";
+                      })()}
                     </div>
                   </div>
                 ))}

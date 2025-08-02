@@ -28,6 +28,7 @@ function Profile({ setProfile, setVerified, setAll }) {
   const imageref = useRef(null);
   const [imageprev, setImageprev] = useState(false);
   const [prevURL, setprevURL] = useState(null);
+  const [dp, setDp] = useState("");
 
   const getProfile = async () => {
     try {
@@ -39,11 +40,12 @@ function Profile({ setProfile, setVerified, setAll }) {
       setName(res.data.name);
       setUsername(res.data.username);
       setBio(res.data.bio);
+      setDp(res.data.dp);
     } catch (err) {}
   };
   useEffect(() => {
     getProfile();
-  }, []);
+  }, [image]);
 
   useEffect(() => {
     if (selection === 1 && name != user?.name) {
@@ -129,26 +131,47 @@ function Profile({ setProfile, setVerified, setAll }) {
   const handlefile = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(file[0]);
+      setImage(file);
+
       setprevURL(URL.createObjectURL(file));
+      setImageprev(true);
     }
-    setImageprev(true);
   };
   const handleUpload = async () => {
     try {
-      const formData = new formData();
-      formData.append("image", dp);
-
-      let res = axios.post(
-        "",
-        formData <
-          {
-            Headers: {
-              "content-type": "multipart/form-data",
-            },
-          }
+      let formData = new FormData();
+      formData.append("image", image);
+      let res = await axios.post(
+        "http://localhost:5000/user/editdp",
+        formData,
+        {
+          headers: {
+            "content-type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
       );
-    } catch (err) {}
+      toast.success("Profile Picture Changed");
+      setImageprev(false);
+      setImage(null);
+      console.log(res);
+
+      seteditpic(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const deleteDp = async () => {
+    let res = axios.post(
+      "http://localhost:5000/user/deletedp",
+      {},
+      { withCredentials: true }
+    );
+    toast.success("Profile Picture deleted");
+    setImageprev(false);
+    setImage(null);
+    seteditpic(false);
+    setDp("");
   };
   return (
     <>
@@ -183,7 +206,10 @@ function Profile({ setProfile, setVerified, setAll }) {
                   onChange={(e) => handlefile(e)}
                 />
               </div>
-              <div className="text-red-500 flex justify-around w-full bg-[#2a3038] py-3 rounded-xl  active:scale-105">
+              <div
+                onClick={() => deleteDp()}
+                className="text-red-500 flex justify-around w-full bg-[#2a3038] py-3 rounded-xl  active:scale-105"
+              >
                 Delete Photo <Trash2 />
               </div>
             </div>
@@ -241,11 +267,22 @@ function Profile({ setProfile, setVerified, setAll }) {
             </div>
           )}
           {selection == 0 && (
-            <div className=" flex  flex-col py-5 items-center justify-between h-9/10">
-              <div className="w-full h-1/5 flex flex-col items-center justify-center gap-4">
-                <div className="bg-white text-center p-15 rounded-full flex items-center justify-center text-3xl font-bold">
-                  M
+            <div className=" flex  flex-col items-center justify-between h-9/10">
+              <div className="w-full h-2/5 flex flex-col items-center justify-center gap-4">
+                <div className=" w-30 h-30 rounded-full overflow-hidden bg-white flex items-center justify-center">
+                  {dp ? (
+                    <img
+                      src={dp}
+                      className="w-full h-full object-cover"
+                      alt="dp"
+                    />
+                  ) : (
+                    <span className="text-3xl font-bold">
+                      {name[0]?.toUpperCase()}
+                    </span>
+                  )}
                 </div>
+
                 <div
                   className="h-1/5 text-sky-500"
                   onClick={() => {
