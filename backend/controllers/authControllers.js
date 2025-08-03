@@ -17,7 +17,7 @@ const register = async (req, res) => {
     });
     console.log(newUser);
     token = jwt.sign(
-      { id: newUser._id, name: newUser.name },
+      { id: newUser._id, name: newUser.name, sameSite: "None" },
       process.env.SECRET_KEY
     );
     res.cookie("token", token, { maxage: 100000, httponly: true });
@@ -44,7 +44,11 @@ const login = async (req, res) => {
         { id: existing_user._id, name: existing_user.name },
         process.env.SECRET_KEY
       );
-      res.cookie("token", token, { maxage: 100000, httponly: true });
+      res.cookie("token", token, {
+        maxage: 100000,
+        httponly: true,
+        sameSite: "None",
+      });
 
       res.status(200).json({ message: "login successfull" });
     } else {
