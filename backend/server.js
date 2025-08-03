@@ -13,7 +13,7 @@ dotenv.config();
 const multer = require("multer");
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://chat-application-psi-vert.vercel.app",
     credentials: true,
   })
 );
@@ -28,5 +28,5 @@ app.get("/", (req, res) => {
 
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
-
-server.listen(5000);
+const PORT = process.env.PORT || 5000;
+server.listen(PORT);
