@@ -8,12 +8,12 @@ const connectDB = require("./utils/connectDB");
 const { Server } = require("socket.io");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
-app.use(express.json());
-app.use(cookieParser());
+
 dotenv.config();
 connectDB();
 const { app, server } = require("./utils/connectSocket");
-
+app.use(express.json());
+app.use(cookieParser());
 const multer = require("multer");
 app.use(
   cors({
