@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import { socket } from "../../connectSocket";
 import { Eye, EyeOff } from "lucide-react";
 function Login({ setVerified, setshowPostLogin }) {
+  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const navigate = useNavigate();
   const [login, setLogin] = useState(true);
   const [name, setName] = useState("");
@@ -33,7 +34,7 @@ function Login({ setVerified, setshowPostLogin }) {
       }
 
       let res = await axios.post(
-        "http://localhost:5000/auth/register",
+        `${BASE_URL}/auth/register`,
         { name, email, password },
         { withCredentials: true }
       );
@@ -61,7 +62,7 @@ function Login({ setVerified, setshowPostLogin }) {
         return;
       }
       let res = await axios.post(
-        "http://localhost:5000/auth/login",
+        `${BASE_URL}/auth/login`,
         { email, password },
         { withCredentials: true }
       );

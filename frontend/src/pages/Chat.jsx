@@ -9,6 +9,7 @@ import Profile from "../components/Profile";
 import MessageNot from "../components/MessageNot";
 import PostLogin from "../components/Postlogin";
 function Chat() {
+  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const [dm_list, set_dm_list] = useState([]);
   const [verified, setVerified] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -31,7 +32,7 @@ function Chat() {
     const verifyUser = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("http://localhost:5000/auth/verify", {
+        const res = await axios.get(`${BASE_URL}/auth/verify`, {
           withCredentials: true,
         });
         setVerified(true);
@@ -76,7 +77,7 @@ function Chat() {
   useEffect(() => {
     const getList = async () => {
       try {
-        let res = await axios.get("http://localhost:5000/user/list", {
+        let res = await axios.get(`${BASE_URL}/user/list`, {
           params: { user: user },
           withCredentials: true,
         });
@@ -100,12 +101,9 @@ function Chat() {
   useEffect(() => {
     const getlastmessages = async () => {
       try {
-        let res = await axios.get(
-          "http://localhost:5000/user/getlastmessages",
-          {
-            withCredentials: true,
-          }
-        );
+        let res = await axios.get(`${BASE_URL}/user/getlastmessages`, {
+          withCredentials: true,
+        });
         console.log(res.data.list);
         setlastmessages(res.data.list);
       } catch (err) {
@@ -156,7 +154,7 @@ function Chat() {
         setSearchResult([]);
         return;
       }
-      const res = await axios.get("http://localhost:5000/user/search", {
+      const res = await axios.get(`${BASE_URL}/user/search`, {
         params: { user: user, name: search },
         withCredentials: true,
       });

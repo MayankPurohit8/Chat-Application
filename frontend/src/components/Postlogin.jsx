@@ -14,15 +14,12 @@ const PostLogin = ({ userid, setshowPostLogin }) => {
           setValidusername(false);
           return;
         }
-        let res = await axios.get(
-          "http://localhost:5000/user/checkvalidusername",
-          {
-            params: {
-              username: username,
-            },
-            withCredentials: true,
-          }
-        );
+        let res = await axios.get(`${BASE_URL}/user/checkvalidusername`, {
+          params: {
+            username: username,
+          },
+          withCredentials: true,
+        });
         console.log(res.data);
         setValidusername(true);
       } catch (err) {
@@ -36,7 +33,7 @@ const PostLogin = ({ userid, setshowPostLogin }) => {
     try {
       if (!validusername) return;
       let res = await axios.put(
-        "http://localhost:5000/user/updateprofile",
+        `${BASE_URL}/user/updateprofile`,
         {
           userid,
           username,

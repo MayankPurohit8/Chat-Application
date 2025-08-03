@@ -6,6 +6,7 @@ import EmojiPicker, { Emoji } from "emoji-picker-react";
 import { socket } from "../../connectSocket";
 import Rec_profile from "./Rec_profile";
 function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
+  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const bottomref = useRef(null);
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState("");
@@ -26,7 +27,7 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
   useEffect(() => {
     const getChats = async () => {
       try {
-        let res = await axios.get("http://localhost:5000/user/getChats", {
+        let res = await axios.get(`${BASE_URL}/user/getChats`, {
           params: { user, to: to._id },
           withCredentials: true,
         });
@@ -70,7 +71,7 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
         formData.append("type", "text");
       }
       formData.append("to", to._id);
-      let res = await axios.post("http://localhost:5000/user/send", formData, {
+      let res = await axios.post(`${BASE_URL}/user/send`, formData, {
         withCredentials: true,
       });
       socket.emit("send-message", res.data.chat, roomid);

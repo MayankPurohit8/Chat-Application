@@ -16,6 +16,7 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 
 function Profile({ setProfile, setVerified, setAll }) {
+  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const [user, setUser] = useState(null);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -32,7 +33,7 @@ function Profile({ setProfile, setVerified, setAll }) {
 
   const getProfile = async () => {
     try {
-      let res = await axios.get("http://localhost:5000/user/profile", {
+      let res = await axios.get(`${BASE_URL}/user/profile`, {
         withCredentials: true,
       });
 
@@ -70,15 +71,12 @@ function Profile({ setProfile, setVerified, setAll }) {
           setValidusername(false);
           return;
         }
-        let res = await axios.get(
-          "http://localhost:5000/user/checkvalidusername",
-          {
-            params: {
-              username: username,
-            },
-            withCredentials: true,
-          }
-        );
+        let res = await axios.get(`${BASE_URL}/user/checkvalidusername`, {
+          params: {
+            username: username,
+          },
+          withCredentials: true,
+        });
         console.log(res.data);
         setValidusername(true);
       } catch (err) {
@@ -99,11 +97,9 @@ function Profile({ setProfile, setVerified, setAll }) {
     else if (selection == 2) tobeupdated.username = username;
     else if (selection == 3) tobeupdated.bio = bio;
     try {
-      let res = await axios.put(
-        "http://localhost:5000/user/updateprofile",
-        tobeupdated,
-        { withCredentials: true }
-      );
+      let res = await axios.put(`${BASE_URL}/user/updateprofile`, tobeupdated, {
+        withCredentials: true,
+      });
       setSelection(0);
       toast.success("updated");
       getProfile();
@@ -113,7 +109,7 @@ function Profile({ setProfile, setVerified, setAll }) {
   const logout = async (req, res) => {
     try {
       let res = await axios.post(
-        "http://localhost:5000/user/logout",
+        `${BASE_URL}/user/logout`,
         {},
         { withCredentials: true }
       );
@@ -141,16 +137,12 @@ function Profile({ setProfile, setVerified, setAll }) {
     try {
       let formData = new FormData();
       formData.append("image", image);
-      let res = await axios.post(
-        "http://localhost:5000/user/editdp",
-        formData,
-        {
-          headers: {
-            "content-type": "multipart/form-data",
-          },
-          withCredentials: true,
-        }
-      );
+      let res = await axios.post(`${BASE_URL}/user/editdp`, formData, {
+        headers: {
+          "content-type": "multipart/form-data",
+        },
+        withCredentials: true,
+      });
       toast.success("Profile Picture Changed");
       setImageprev(false);
       setImage(null);
@@ -163,7 +155,7 @@ function Profile({ setProfile, setVerified, setAll }) {
   };
   const deleteDp = async () => {
     let res = axios.post(
-      "http://localhost:5000/user/deletedp",
+      `${BASE_URL}/user/deletedp`,
       {},
       { withCredentials: true }
     );
