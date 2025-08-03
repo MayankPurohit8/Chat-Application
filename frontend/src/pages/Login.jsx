@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 import { socket } from "../../connectSocket";
 import { Eye, EyeOff } from "lucide-react";
 function Login({ setVerified, setshowPostLogin }) {
-  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const BASE_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const [login, setLogin] = useState(true);
   const [name, setName] = useState("");

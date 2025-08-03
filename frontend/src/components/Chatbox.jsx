@@ -6,7 +6,7 @@ import EmojiPicker, { Emoji } from "emoji-picker-react";
 import { socket } from "../../connectSocket";
 import Rec_profile from "./Rec_profile";
 function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
-  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const BASE_URL = import.meta.env.VITE_API_URL;
   const bottomref = useRef(null);
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState("");

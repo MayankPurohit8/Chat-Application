@@ -3,6 +3,7 @@ import { CircleCheck, CircleX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 const PostLogin = ({ userid, setshowPostLogin }) => {
+  const BASE_URL = import.meta.env.VITE_API_URL;
   const [username, setUserName] = useState("");
   const [bio, setBio] = useState("");
   const [validusername, setValidusername] = useState(false);
