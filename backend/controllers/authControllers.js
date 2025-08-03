@@ -20,7 +20,12 @@ const register = async (req, res) => {
       { id: newUser._id, name: newUser.name, sameSite: "None" },
       process.env.SECRET_KEY
     );
-    res.cookie("token", token, { maxage: 100000, httponly: true });
+    res.cookie("token", token, {
+      maxage: 100000,
+      httponly: true,
+      secure: true,
+      sameSite: "None",
+    });
     return res.status(201).json({ message: "Email Registered Successfully" });
   } catch (err) {
     res.status(500).json({
@@ -47,6 +52,7 @@ const login = async (req, res) => {
       res.cookie("token", token, {
         maxage: 100000,
         httponly: true,
+        secure: true,
         sameSite: "None",
       });
 
