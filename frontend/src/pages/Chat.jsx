@@ -4,10 +4,9 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { socket } from "../../connectSocket";
-import { Link } from "react-router";
 import Login from "./Login";
 import Profile from "../components/Profile";
-import MessageNot from "../components/messageNot";
+import MessageNot from "../components/MessageNot";
 import PostLogin from "../components/Postlogin";
 function Chat() {
   const [dm_list, set_dm_list] = useState([]);

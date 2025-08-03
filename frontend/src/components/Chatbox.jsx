@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Send, Ellipsis, X, ArrowLeft, Mic, Images, Smile } from "lucide-react";
+import { Send, X, ArrowLeft, Mic, Images, Smile } from "lucide-react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import EmojiPicker, { Emoji } from "emoji-picker-react";
