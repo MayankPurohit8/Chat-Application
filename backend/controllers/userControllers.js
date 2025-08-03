@@ -13,7 +13,7 @@ const sendMessage = async (req, res) => {
     if (type == "image") {
       console.log(req.file);
       const filepath = req.file?.path;
-      const result = await uploadFile(filepath);
+      const result = await uploadFile(filepath, "chatimgs");
 
       chat = result.secure_url;
     } else {
@@ -67,21 +67,30 @@ const getProfile = async (req, res) => {
 
 const searchUser = async (req, res) => {
   try {
-    const { user, name } = req.query;
+    const { name } = req.query;
+    if (!name) {
+      return res.status(400).json({ message: "Name query is required" });
+    }
 
-    const users = await User.find({ name: { $regex: `^${name}` } }).select(
-      "-password -__v"
-    );
-    const curruser = await User.findById(user);
+    const curruser = await User.findById(req.id).select("dm_list");
+
+    const users = await User.find({
+      name: { $regex: `^${name}`, $options: "i" },
+    }).select("-password -__v -dm_list");
+
     const resUser = users.filter(
-      (user) => !curruser.dm_list.includes(user._id) && user != curruser._id
+      (res) =>
+        !curruser.dm_list
+          .map((id) => id.toString())
+          .includes(res._id.toString()) && req.id !== res._id.toString()
     );
 
     return res.status(200).json({ users: resUser });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "somethin went wrong while searching" });
+    console.error(err);
+    return res.status(500).json({
+      message: "Something went wrong while searching",
+    });
   }
 };
 
@@ -198,7 +207,7 @@ const editDp = async (req, res) => {
     if (!filepath) {
       return res.status(400).json({ message: "No file provided" });
     }
-    const result = await uploadFile(filepath);
+    const result = await uploadFile(filepath, "Dps");
     const olduser = await User.findById(req.id);
     const olddp = olduser.dp_id;
     if (olddp) {

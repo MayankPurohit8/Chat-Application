@@ -17,7 +17,7 @@ const {
   deleteDp,
 } = require("../controllers/userControllers");
 
-router.get("/search", searchUser);
+router.get("/search", verifyAuth, searchUser);
 router.get("/getChats", getChats);
 router.post("/send", verifyAuth, upload.single("image"), sendMessage);
 router.get("/list", getlist);

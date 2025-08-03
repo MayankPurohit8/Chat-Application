@@ -18,6 +18,7 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
   const imageref = useRef(null);
   const [imageprevurl, setImageprevurl] = useState(null);
   const [messageType, setMessageType] = useState("text");
+  const [sendLoad, setSendload] = useState(false);
   const roomid = [user, to._id].sort().join("_");
   useEffect(() => {
     onlineUsers?.includes(to._id) ? setOnline(true) : setOnline(false);
@@ -41,16 +42,21 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
   }, [chats]);
   useEffect(() => {
     const addMessage = (data, name) => {
-      setChats((prev) => [...prev, data]);
+      console.log(data);
+      console.log(to);
+      if (data.created_by == to._id || data.created_to == to._id) {
+        setChats((prev) => [...prev, data]);
+      }
     };
     socket.on("recieve-message", addMessage);
     return () => {
       socket.off("recieve-message", addMessage);
     };
-  }, [dm_list]);
+  }, [dm_list, to]);
 
   const sendMessage = async () => {
     try {
+      setSendload(true);
       if (message == "" && !image) {
         toast.warn("type something");
         return;
@@ -72,7 +78,10 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
       setMessage("");
       setImagePrev(false);
       setImage(null);
-    } catch (err) {}
+      setSendload(false);
+    } catch (err) {
+      setSendload(false);
+    }
   };
   const [senderId, setsenderId] = useState(user);
   const [recProfile, setrecProfile] = useState(false);
@@ -151,7 +160,6 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
                 {to?.dp != "" ? (
                   <img
                     src={to.dp}
-                    alt=""
                     className="w-full h-full ovject-contain rounded-full"
                   />
                 ) : (
@@ -190,7 +198,6 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
                     {chat.type == "image" ? (
                       <img
                         src={chat.chat}
-                        alt=""
                         className="rounded-2xl object-cover "
                       />
                     ) : (
@@ -286,7 +293,11 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
                   sendMessage();
                 }}
               >
-                <Send color="gray" />
+                {sendLoad ? (
+                  <div className=" rounded-full border-2 border-sky-500 border-b-[#1D2127] animate-spin h-5 w-5"></div>
+                ) : (
+                  <Send color="gray" />
+                )}
               </div>
             </div>
           </div>

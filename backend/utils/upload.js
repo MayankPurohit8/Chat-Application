@@ -9,10 +9,10 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
-const uploadFile = async (filePath) => {
+const uploadFile = async (filePath, foldername) => {
   try {
     const result = await cloudinary.uploader.upload(filePath, {
-      folder: "DisplayPictures",
+      folder: foldername,
     });
     fs.unlinkSync(filePath);
     return result;

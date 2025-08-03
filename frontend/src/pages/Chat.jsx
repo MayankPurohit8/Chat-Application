@@ -1,4 +1,4 @@
-import { Search, X, UserRoundCog, Hourglass, Images } from "lucide-react";
+import { Search, X, UserRoundCog, Hourglass, Images, User } from "lucide-react";
 import Chatbox from "../components/Chatbox";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
@@ -12,7 +12,7 @@ import PostLogin from "../components/Postlogin";
 function Chat() {
   const [dm_list, set_dm_list] = useState([]);
   const [verified, setVerified] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState();
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
@@ -196,8 +196,8 @@ function Chat() {
   if (loading) {
     return (
       <>
-        <div className="h-screen w-screen bg-[#F9F5EC] flex justify-center items-center gap-3 ">
-          <div className="animate-spin w-20 h-20 border-4 border-b-4 rounded-full border-b-white border-[#F47256] "></div>
+        <div className="h-screen w-screen bg-[#17191A] flex justify-center items-center gap-3 ">
+          <div className="animate-spin w-20 h-20 border-4 border-b-4 rounded-full border-b-[#17191A]  border-sky-500 "></div>
           <div className="font-mono text-5xl font-semibold"></div>
         </div>
       </>
@@ -223,6 +223,7 @@ function Chat() {
           setProfile={setProfile}
           setVerified={setVerified}
           setAll={setUser}
+          setLoading={setLoading}
         />
       )}
       {searchResultvisible && (
@@ -246,7 +247,7 @@ function Chat() {
               />
               <div
                 className="rounded-full hover:bg-gray-300 p-2"
-                onClick={() => searchUser()}
+                onClick={() => searchUser(e.target.value)}
               >
                 <Search color="gray" />
               </div>
@@ -258,8 +259,17 @@ function Chat() {
                   onClick={() => tempAdd(user)}
                 >
                   <div className=" flex items-center justify-center ">
-                    <div className="border md:px-5 md:py-3 px-3 py-2 rounded-full">
-                      U
+                    <div className="border rounded-full h-20 w-20 relative ">
+                      {user.dp != "" ? (
+                        <img
+                          src={user.dp}
+                          className="h-full w-full object-contain rounded-full"
+                        />
+                      ) : (
+                        <div className="absolute h-full w-full flex items-center justify-center">
+                          <User size={40} color="gray" />
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="overflow-hidden font-bold text-2xl">
@@ -272,10 +282,18 @@ function Chat() {
         </div>
       )}
       {!verified && (
-        <Login setVerified={setVerified} setshowPostLogin={setshowPostLogin} />
+        <Login
+          setVerified={setVerified}
+          setshowPostLogin={setshowPostLogin}
+          setLoading={setLoading}
+        />
       )}
       {verified && showPostLogin && (
-        <PostLogin setshowPostLogin={setshowPostLogin} userid={user} />
+        <PostLogin
+          setshowPostLogin={setshowPostLogin}
+          userid={user}
+          setLoading={setLoading}
+        />
       )}
       <div
         className={`font-mono  h-screen w-screen ${
