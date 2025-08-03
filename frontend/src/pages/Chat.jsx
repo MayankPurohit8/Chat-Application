@@ -25,6 +25,7 @@ function Chat() {
   const [showPostLogin, setshowPostLogin] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState();
   useEffect(() => {
+    console.log(BASE_URL);
     if (verified && !socket.connected) {
       socket.connect();
       socket.emit("join-private-room", user);
