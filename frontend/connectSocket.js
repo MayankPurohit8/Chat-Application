@@ -5,7 +5,7 @@ const getCookie = () => {
   console.log(token);
   return token;
 };
-const socket = io("http://localhost:5000", {
+const socket = io(import.meta.env.VITE_SOCKET_URL, {
   autoConnect: false,
   withCredentials: true,
 });
