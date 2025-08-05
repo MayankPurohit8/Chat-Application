@@ -23,7 +23,7 @@ function Chat() {
   const [lastmessages, setlastmessages] = useState([]);
   const [profile, setProfile] = useState(false);
   const lastmessref = useRef(lastmessages);
-  const [showPostLogin, setshowPostLogin] = useState(true);
+  const [showPostLogin, setshowPostLogin] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState();
   useEffect(() => {
     console.log(BASE_URL);
