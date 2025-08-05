@@ -10,6 +10,7 @@ import MessageNot from "../components/MessageNot";
 import PostLogin from "../components/Postlogin";
 function Chat() {
   const BASE_URL = import.meta.env.VITE_API_URL;
+  console.log(BASE_URL);
   const [dm_list, set_dm_list] = useState([]);
   const [verified, setVerified] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -22,7 +23,7 @@ function Chat() {
   const [lastmessages, setlastmessages] = useState([]);
   const [profile, setProfile] = useState(false);
   const lastmessref = useRef(lastmessages);
-  const [showPostLogin, setshowPostLogin] = useState(false);
+  const [showPostLogin, setshowPostLogin] = useState(true);
   const [onlineUsers, setOnlineUsers] = useState();
   useEffect(() => {
     console.log(BASE_URL);

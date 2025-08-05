@@ -3,8 +3,8 @@ import axios from "axios";
 import { Bounce, toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router";
 import { socket } from "../../connectSocket";
-import { Eye, EyeOff } from "lucide-react";
-function Login({ setVerified, setshowPostLogin }) {
+import { CircleCheck, CircleX, Eye, EyeOff } from "lucide-react";
+function Login({ setVerified, setshowPostLogin, setLoading }) {
   const BASE_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const [login, setLogin] = useState(true);
@@ -14,6 +14,30 @@ function Login({ setVerified, setshowPostLogin }) {
   const [confirmpassword, setconfirmpassword] = useState("");
   const [match, setmatch] = useState(true);
   const [showpassword, setShowpasword] = useState(false);
+  const [username, setUsername] = useState("");
+  const [validusername, setValidusername] = useState(false);
+
+  useEffect(() => {
+    const checkValid = async (e) => {
+      try {
+        if (username === "") {
+          setValidusername(false);
+          return;
+        }
+        let res = await axios.get(`${BASE_URL}/user/checkvalidusername`, {
+          params: {
+            username: username,
+          },
+          withCredentials: true,
+        });
+
+        setValidusername(true);
+      } catch (err) {
+        setValidusername(false);
+      }
+    };
+    checkValid();
+  }, [username]);
   useEffect(() => {
     if (confirmpassword != "") {
       setmatch(password === confirmpassword);
@@ -32,21 +56,25 @@ function Login({ setVerified, setshowPostLogin }) {
         toast.error("pssword does not match!");
         return;
       }
-
+      setLoading(true);
       let res = await axios.post(
         `${BASE_URL}/auth/register`,
-        { name, email, password },
+        { name, email, username, password },
         { withCredentials: true }
       );
       toast.success(res.data.message);
       setEmail("");
       setName("");
       setPassword("");
+      setconfirmpassword("");
+      setUsername("");
       setVerified(true);
       setshowPostLogin(true);
+      setLoading(false);
     } catch (err) {
       console.log(err.response);
-      toast.error(err.response.data.message);
+      toast.error("something went wrong while registering user");
+      setLoading(false);
     }
   };
 
@@ -61,6 +89,7 @@ function Login({ setVerified, setshowPostLogin }) {
         toast.error("pssword does not match!");
         return;
       }
+      setLoading(true);
       let res = await axios.post(
         `${BASE_URL}/auth/login`,
         { email, password },
@@ -68,11 +97,12 @@ function Login({ setVerified, setshowPostLogin }) {
       );
       console.log(res);
       toast.success(res.data.message);
-
       socket.connect();
       setVerified(true);
+      setLoading(false);
     } catch (err) {
-      toast.error(err.response.data.message);
+      toast.error("Something went wrong while Logging in");
+      setLoading(false);
     }
   };
   return (
@@ -182,10 +212,10 @@ function Login({ setVerified, setshowPostLogin }) {
               <div className="text-center text-4xl text-gray-400 font-semibold">
                 Register
               </div>
-              <div className="text-center text-gray-600 mt-2 mb-5 text-md font-mono">
+              <div className="text-center text-gray-600 md:mt-2 mt-1 md:mb-4 text-md font-mono">
                 enter your credentials to create account
               </div>
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
                 <div className="flex flex-col">
                   <label htmlFor="" className="font-mono text-gray-700">
                     Email
@@ -213,6 +243,30 @@ function Login({ setVerified, setshowPostLogin }) {
                     placeholder="John Smith"
                     className="px-3 py-3 outline-none border border-sky-500 rounded-lg placeholder:text-gray-600 "
                   />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="" className="font-mono text-gray-700">
+                    Username
+                  </label>
+                  <div className="px-3 py-3 outline-none border border-sky-500 rounded-lg flex justify-between">
+                    <input
+                      className=" placeholder:text-gray-600 outline-none w-9/10"
+                      value={username}
+                      placeholder="johnsmith23"
+                      onChange={(e) => {
+                        setUsername(e.target.value);
+                      }}
+                    />
+                    {username != "" && (
+                      <div className="">
+                        {validusername ? (
+                          <CircleCheck color="green" />
+                        ) : (
+                          <CircleX color="red" />
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex flex-col">
                   <label htmlFor="" className="font-mono text-gray-700">

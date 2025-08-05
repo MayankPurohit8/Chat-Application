@@ -130,7 +130,7 @@ function Profile({ setProfile, setVerified, setAll }) {
       setImage(file);
 
       setprevURL(URL.createObjectURL(file));
-      setImageprev(true);
+      setImageprev(false);
     }
   };
   const handleUpload = async () => {

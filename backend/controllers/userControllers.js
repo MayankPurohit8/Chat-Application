@@ -158,23 +158,11 @@ const checkValidUsername = async (req, res) => {
   }
 };
 
-const checkValidemail = async (req, res) => {
-  try {
-    const { username } = req.query;
-    const is = await User.findOne({ email: email });
-    if (is) {
-      return res.status(400);
-    }
-    return res.status(201);
-  } catch (err) {
-    return res.status(500);
-  }
-};
-
 const updateProfile = async (req, res) => {
   try {
     console.log(req.body);
-    const { userid, username, name, email, bio } = req.body;
+    const { username, name, email, bio } = req.body;
+    const userid = req.id;
     const updateField = {};
     if (username) updateField.username = username;
     if (name) updateField.name = name;

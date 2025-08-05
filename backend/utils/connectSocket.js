@@ -5,10 +5,13 @@ import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 const app = express();
 const server = http.createServer(app);
-
+const BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://chat-application-psi-vert.vercel.app"
+    : "http://localhost:5173";
 const io = new Server(server, {
   cors: {
-    origin: "https://chat-application-psi-vert.vercel.app",
+    origin: BASE_URL,
     credentials: true,
   },
 });

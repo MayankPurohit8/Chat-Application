@@ -24,7 +24,7 @@ router.get("/list", getlist);
 router.get("/profile", verifyAuth, getProfile);
 router.get("/getlastmessages", verifyAuth, getLastMessages);
 router.get("/checkvalidusername", checkValidUsername);
-router.put("/updateprofile", updateProfile);
+router.put("/updateprofile", verifyAuth, updateProfile);
 router.post("/logout", logout);
 router.post("/editDp", verifyAuth, upload.single("image"), editDp);
 router.post("/deletedp", verifyAuth, deleteDp);

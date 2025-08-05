@@ -1,11 +1,6 @@
 import { io } from "socket.io-client";
-
-const getCookie = () => {
-  let token = document.cookie;
-  console.log(token);
-  return token;
-};
-const socket = io(import.meta.env.VITE_API_URL, {
+const BASE_URL = import.meta.env.VITE_API_URL;
+const socket = io(BASE_URL, {
   autoConnect: false,
   withCredentials: true,
 });

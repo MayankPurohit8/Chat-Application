@@ -57,11 +57,11 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
 
   const sendMessage = async () => {
     try {
-      setSendload(true);
       if (message == "" && !image) {
         toast.warn("type something");
         return;
       }
+      setSendload(true);
       const formData = new FormData();
       if (image) {
         formData.append("image", image);
