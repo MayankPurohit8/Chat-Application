@@ -1,12 +1,14 @@
+import { User2 } from "lucide-react";
+
 function Rec_profile({ to, online }) {
   return (
     <>
-      <div className="border-2 h-full bg-white ">
-        <div className="h-1/2  ">
-          {to?.dp != "" ? (
+      <div className="border-2 h-full  ">
+        <div className="h-1/2 flex items-center justify-center ">
+          {to?.dp ? (
             <img src={to.dp} alt="" className="w-full h-full ovject-contain " />
           ) : (
-            to.name[0]
+            <User2 size={200} color="gray" />
           )}
         </div>
         <div className="bg-[#1D2127] h-1/2 flex flex-col px-7 py-10 gap-2 ">

@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Send, X, ArrowLeft, Mic, Images, Smile } from "lucide-react";
+import {
+  Send,
+  X,
+  ArrowLeft,
+  Mic,
+  Images,
+  Smile,
+  User,
+  User2,
+} from "lucide-react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import EmojiPicker, { Emoji } from "emoji-picker-react";
@@ -157,15 +166,13 @@ function Chatbox({ to, user, setSection, tempAdd, dm_list, onlineUsers }) {
                 setrecProfile(!recProfile);
               }}
             >
-              <div className="border  rounded-full  h-full w-full bg-white">
-                {to?.dp != "" ? (
+              <div className="border  rounded-full  h-full w-full  ">
+                {to?.dp ? (
                   <img
                     src={to.dp}
                     className="w-full h-full ovject-contain rounded-full"
                   />
-                ) : (
-                  to.name[0]
-                )}
+                ) : null}
               </div>
               <div className="font-bold text-gray-200 ">{to.name}</div>
             </div>
