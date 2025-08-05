@@ -74,7 +74,7 @@ blab/
 ## 🌐 Live Demo
 
 > If deployed, add your live demo link here:
-> [🔗 Visit Live Demo](https://yourprojectdemo.com)
+> [🔗 Visit Live Demo]([https://chat-application-psi-vert.vercel.app/])
 
 ---
 
